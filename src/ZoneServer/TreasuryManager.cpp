@@ -83,32 +83,32 @@ std::tr1::shared_ptr<RadialMenu> TreasuryManager::bankBuildTerminalRadialMenu(Cr
 
 	Bank*		bank	= dynamic_cast<Bank*>(creatureObject->getEquipManager()->getEquippedObject(CreatureEquipSlot_Bank));
 
-	radial->addItem(1,0,radId_itemUse,radAction_ObjCallback);
-	radial->addItem(2,1,radId_bankTransfer,radAction_ObjCallback,"@sui:bank_credits");
+	radial->addItem(1, 0, radId_itemUse, radAction_ObjCallback);
+	radial->addItem(2, 1, radId_bankTransfer, radAction_ObjCallback, "@sui:bank_credits");
 
 	// case its our bank
 	if(static_cast<uint32>(bank->getPlanet()) == gWorldManager->getZoneId())
 	{
-		radial->addItem(3,1,radId_bankItems,radAction_ObjCallback,"@sui:bank_items");
-		radial->addItem(4,1,radId_bankQuit,radAction_ObjCallback,"@sui:bank_quit");
-		radial->addItem(5,1,radId_bankWithdrawAll,radAction_ObjCallback,"@sui:bank_withdrawall");
-		radial->addItem(6,1,radId_bankDepositAll,radAction_ObjCallback,"@sui:bank_depositall");
+		radial->addItem(3, 1, radId_bankItems, radAction_ObjCallback, "@sui:bank_items");
+		radial->addItem(4, 1, radId_bankQuit, radAction_ObjCallback, "@sui:bank_quit");
+		radial->addItem(5, 1, radId_bankWithdrawAll, radAction_ObjCallback, "@sui:bank_withdrawall");
+		radial->addItem(6, 1, radId_bankDepositAll, radAction_ObjCallback, "@sui:bank_depositall");
 	}
 
 	// case we have no binded bank
 	// Do not allow to join bank in tutorial, player will never be able to quit that bank when he/she has left tutorial.
 	else if ((bank->getPlanet() < 0) && (!gWorldConfig->isTutorial()))
 	{
-		radial->addItem(3,1,radId_bankJoin,radAction_ObjCallback,"@sui:bank_join");
-		radial->addItem(4,1,radId_bankWithdrawAll,radAction_ObjCallback,"@sui:bank_withdrawall");
-		radial->addItem(5,1,radId_bankDepositAll,radAction_ObjCallback,"@sui:bank_depositall");
+		radial->addItem(3, 1, radId_bankJoin, radAction_ObjCallback, "@sui:bank_join");
+		radial->addItem(4, 1, radId_bankWithdrawAll, radAction_ObjCallback, "@sui:bank_withdrawall");
+		radial->addItem(5, 1, radId_bankDepositAll, radAction_ObjCallback, "@sui:bank_depositall");
 	}
 
 	// case its not our bank
 	else
 	{
-		radial->addItem(3,1,radId_bankWithdrawAll,radAction_ObjCallback,"@sui:bank_withdrawall");
-		radial->addItem(4,1,radId_bankDepositAll,radAction_ObjCallback,"@sui:bank_depositall");
+		radial->addItem(3, 1, radId_bankWithdrawAll, radAction_ObjCallback, "@sui:bank_withdrawall");
+		radial->addItem(4, 1, radId_bankDepositAll, radAction_ObjCallback, "@sui:bank_depositall");
 	}
 
 	return radial;
@@ -130,10 +130,10 @@ void TreasuryManager::bankDepositAll(PlayerObject* playerObject)
 				bank->setCredits(bank->getCredits() + credits);
 				inventory->setCredits(0);
 				// save to the db
-				mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE banks SET credits=%u WHERE id=%"PRIu64"",bank->getCredits(),bank->getId()));
-				gLogger->log(LogManager::DEBUG, "SQL :: UPDATE banks SET credits=%u WHERE id=%"PRIu64"",bank->getCredits(),bank->getId()); // SQL Debug Log
-				mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE inventories SET credits=%u WHERE id=%"PRIu64"",inventory->getCredits(),inventory->getId()));
-				gLogger->log(LogManager::DEBUG, "SQL :: UPDATE inventories SET credits=%u WHERE id=%"PRIu64"",inventory->getCredits(),inventory->getId()); // SQL Debug Log
+				mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE banks SET credits=%u WHERE id=%"PRIu64"", bank->getCredits(), bank->getId()));
+				gLogger->log(LogManager::DEBUG, "SQL :: UPDATE banks SET credits=%u WHERE id=%"PRIu64"", bank->getCredits(), bank->getId()); // SQL Debug Log
+				mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE inventories SET credits=%u WHERE id=%"PRIu64"", inventory->getCredits(), inventory->getId()));
+				gLogger->log(LogManager::DEBUG, "SQL :: UPDATE inventories SET credits=%u WHERE id=%"PRIu64"", inventory->getCredits(), inventory->getId()); // SQL Debug Log
 
 				//send the appropriate deltas.
 				gMessageLib->sendInventoryCreditsUpdate(playerObject);
@@ -168,10 +168,10 @@ void TreasuryManager::bankWithdrawAll(PlayerObject* playerObject)
 				bank->setCredits(0);
 
 				// save to the db
-				mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE banks SET credits=%u WHERE id=%"PRIu64"",bank->getCredits(),bank->getId()));
-				gLogger->log(LogManager::DEBUG, "SQL :: UPDATE banks SET credits=%u WHERE id=%"PRIu64"",bank->getCredits(),bank->getId()); // SQL Debug Log
-				mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE inventories SET credits=%u WHERE id=%"PRIu64"",inventory->getCredits(),inventory->getId()));
-				gLogger->log(LogManager::DEBUG, "SQL :: UPDATE inventories SET credits=%u WHERE id=%"PRIu64"",inventory->getCredits(),inventory->getId()); // SQL Debug Log
+				mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE banks SET credits=%u WHERE id=%"PRIu64"", bank->getCredits(), bank->getId()));
+				gLogger->log(LogManager::DEBUG, "SQL :: UPDATE banks SET credits=%u WHERE id=%"PRIu64"", bank->getCredits(), bank->getId()); // SQL Debug Log
+				mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE inventories SET credits=%u WHERE id=%"PRIu64"", inventory->getCredits(), inventory->getId()));
+				gLogger->log(LogManager::DEBUG, "SQL :: UPDATE inventories SET credits=%u WHERE id=%"PRIu64"", inventory->getCredits(), inventory->getId()); // SQL Debug Log
 
 				//send the appropriate deltas.
 				gMessageLib->sendInventoryCreditsUpdate(playerObject);
@@ -286,7 +286,8 @@ void TreasuryManager::bankQuit(PlayerObject* playerObject)
 		bank->setPlanet(-1);
 
 		// save to db
-		mDatabase->ExecuteSqlAsync(NULL,NULL,"UPDATE banks SET planet_id = -1 WHERE id=%"PRIu64"",bank->getId());
+		mDatabase->ExecuteSqlAsync(NULL, NULL, "UPDATE banks SET planet_id = -1 WHERE id=%"PRIu64";", bank->getId());
+		gLogger->log(LogManager::DEBUG,"UPDATE banks SET planet_id = -1 WHERE id = %"PRIu64";", bank->getId()); // SQL Debug Log
 
 		//This message has a period added to the end as it was missing from client.
         gMessageLib->SendSystemMessage(::common::OutOfBand("system_msg", "succesfully_quit_bank"), playerObject);
@@ -316,7 +317,8 @@ void TreasuryManager::bankJoin(PlayerObject* playerObject)
 		bank->setPlanet((int8)gWorldManager->getZoneId());
 
 		// save to db
-		mDatabase->ExecuteSqlAsync(NULL,NULL,"UPDATE banks SET planet_id=%i WHERE id=%"PRIu64"",bank->getPlanet(),bank->getId());
+		mDatabase->ExecuteSqlAsync(NULL, NULL, "UPDATE banks SET planet_id = %i WHERE id = %"PRIu64";", bank->getPlanet(), bank->getId());
+		gLogger->log(LogManager::DEBUG,"UPDATE banks SET planet_id = %i WHERE id = %"PRIu64";", bank->getPlanet(), bank->getId()); // SQL Debug Log
 
 		//This message period added at the end as its missing from client.
         gMessageLib->SendSystemMessage(::common::OutOfBand("system_msg", "succesfully_joined_bank"), playerObject);
@@ -327,8 +329,8 @@ void TreasuryManager::bankJoin(PlayerObject* playerObject)
 
 void TreasuryManager::saveAndUpdateInventoryCredits(PlayerObject* playerObject)
 {
-	mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE inventories SET credits=%u WHERE id=%"PRIu64"",dynamic_cast<Inventory*>(playerObject->getEquipManager()->getEquippedObject(CreatureEquipSlot_Inventory))->getCredits(),playerObject->getId() + 1));
-	gLogger->log(LogManager::DEBUG, "SQL :: UPDATE inventories SET credits=%u WHERE id=%"PRIu64"",dynamic_cast<Inventory*>(playerObject->getEquipManager()->getEquippedObject(CreatureEquipSlot_Inventory))->getCredits(),playerObject->getId() + 1); // SQL Debug Log
+	mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE inventories SET credits=%u WHERE id=%"PRIu64"", dynamic_cast<Inventory*>(playerObject->getEquipManager()->getEquippedObject(CreatureEquipSlot_Inventory))->getCredits(),playerObject->getId() + 1));
+	gLogger->log(LogManager::DEBUG, "SQL :: UPDATE inventories SET credits=%u WHERE id=%"PRIu64"", dynamic_cast<Inventory*>(playerObject->getEquipManager()->getEquippedObject(CreatureEquipSlot_Inventory))->getCredits(),playerObject->getId() + 1); // SQL Debug Log
 	gMessageLib->sendInventoryCreditsUpdate(playerObject);
 }
 
@@ -336,8 +338,8 @@ void TreasuryManager::saveAndUpdateInventoryCredits(PlayerObject* playerObject)
 
 void TreasuryManager::saveAndUpdateBankCredits(PlayerObject* playerObject)
 {
-	mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE banks SET credits=%u WHERE id=%"PRIu64"",dynamic_cast<Bank*>(playerObject->getEquipManager()->getEquippedObject(CreatureEquipSlot_Bank))->getCredits(), playerObject->getId() + 4));
-	gLogger->log(LogManager::DEBUG, "SQL :: UPDATE banks SET credits=%u WHERE id=%"PRIu64"",dynamic_cast<Bank*>(playerObject->getEquipManager()->getEquippedObject(CreatureEquipSlot_Bank))->getCredits(), playerObject->getId() + 4); // SQL Debug Log
+	mDatabase->DestroyResult(mDatabase->ExecuteSynchSql("UPDATE banks SET credits=%u WHERE id=%"PRIu64"", dynamic_cast<Bank*>(playerObject->getEquipManager()->getEquippedObject(CreatureEquipSlot_Bank))->getCredits(), playerObject->getId() + 4));
+	gLogger->log(LogManager::DEBUG, "SQL :: UPDATE banks SET credits=%u WHERE id=%"PRIu64"", dynamic_cast<Bank*>(playerObject->getEquipManager()->getEquippedObject(CreatureEquipSlot_Bank))->getCredits(), playerObject->getId() + 4); // SQL Debug Log
 	gMessageLib->sendBankCreditsUpdate(playerObject);
 }
 
@@ -367,16 +369,17 @@ void TreasuryManager::bankTipOffline(int32 amount,PlayerObject* playerObject,BSt
 	mDatabase->Escape_String(name,targetName.getAnsi(),targetName.getLength());
 
 	int8 sql[256];
-	sprintf(sql,"SELECT id FROM characters WHERE firstname like '%s'",name);
+	sprintf(sql, "SELECT id FROM characters WHERE firstname like '%s'", name);
 
 	TreasuryManagerAsyncContainer* asyncContainer;
-	asyncContainer = new TreasuryManagerAsyncContainer(TREMQuery_BankTipgetId,playerObject->getClient());
+	asyncContainer = new TreasuryManagerAsyncContainer(TREMQuery_BankTipgetId, playerObject->getClient());
 	asyncContainer->amount = amount;
 	asyncContainer->surcharge = surcharge;
 	asyncContainer->targetName = targetName;
 	asyncContainer->player = playerObject;
 
-	mDatabase->ExecuteSqlAsync(this,asyncContainer,sql);
+	mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
+	gLogger->log(LogManager::DEBUG,"SQL :: ", sql); // SQL Debug Log
 }
 
 //======================================================================================================================
@@ -552,7 +555,7 @@ void TreasuryManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result
 		{
 			uint32 error;
 			DataBinding* binding = mDatabase->CreateDataBinding(1);
-			binding->addField(DFT_uint32,0,4);
+			binding->addField(DFT_uint32, 0, 4);
 			result->GetNextRow(binding,&error);
 
 			if (error == 0)

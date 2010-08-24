@@ -118,8 +118,8 @@ WorldManager::WorldManager(uint32 zoneId,ZoneServer* zoneServer,Database* databa
     }
 
     // load planet names and terrain files so we can start heightmap loading
-    mDatabase->ExecuteSqlAsync(this,new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_PlanetNamesAndFiles),"SELECT * FROM planet ORDER BY planet_id;");
-    gLogger->log(LogManager::DEBUG, "SQL :: SELECT * FROM planet ORDER BY planet_id;"); // SQL Debug Log	
+    mDatabase->ExecuteSqlAsync(this, new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_PlanetNamesAndFiles), "SELECT * FROM swganh_static.planet ORDER BY planet_id;");
+    gLogger->log(LogManager::DEBUG, "SQL :: SELECT * FROM swganh_static.planet ORDER BY planet_id;"); // SQL Debug Log	
     
 
     // create schedulers
@@ -145,17 +145,17 @@ WorldManager::WorldManager(uint32 zoneId,ZoneServer* zoneServer,Database* databa
     //the resourcemanager gets accessed by lowlevel functions to check the IDs we get send by the client 
     //it will have to be initialized in the tutorial, too
     if(zoneId != 41)
-        ResourceManager::Init(database,mZoneId);
+        ResourceManager::Init(database, mZoneId);
     else
     {
         //by not assigning a db we force the resourcemanager to not load db data
-        ResourceManager::Init(NULL,mZoneId);
+        ResourceManager::Init(NULL, mZoneId);
     }
     TreasuryManager::Init(database);
     ConversationManager::Init(database);
     CraftingSessionFactory::Init(database);
     if(zoneId != 41)
-        MissionManager::Init(database,mZoneId);
+        MissionManager::Init(database, mZoneId);
 
     // register world script hooks
     _registerScriptHooks();
@@ -164,11 +164,11 @@ WorldManager::WorldManager(uint32 zoneId,ZoneServer* zoneServer,Database* databa
     if(mDebug)
     {
         gLogger->log(LogManager::INFORMATION,"World Manager Debug StartUp with culled items, npcs, resources and stuff");
-        mDatabase->ExecuteSqlAsync(this,new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_ObjectCount),"SELECT sf_getZoneObjectCountDebug(%i);",mZoneId);
+        mDatabase->ExecuteSqlAsync(this, new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_ObjectCount),"SELECT sf_getZoneObjectCountDebug(%i);", mZoneId);
         gLogger->log(LogManager::DEBUG, "SQL :: SELECT sf_getZoneObjectCountDebug(%i);",mZoneId); // SQL Debug Log	
     }
     else
-        mDatabase->ExecuteSqlAsync(this,new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_ObjectCount),"SELECT sf_getZoneObjectCount(%i);",mZoneId);
+        mDatabase->ExecuteSqlAsync(this, new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_ObjectCount),"SELECT sf_getZoneObjectCount(%i);", mZoneId);
     gLogger->log(LogManager::DEBUG, "SQL :: SELECT sf_getZoneObjectCount(%i);",mZoneId); // SQL Debug Log	
 
 #if defined(_MSC_VER)
@@ -180,11 +180,11 @@ WorldManager::WorldManager(uint32 zoneId,ZoneServer* zoneServer,Database* databa
 
 //======================================================================================================================
 
-WorldManager*	WorldManager::Init(uint32 zoneId,ZoneServer* zoneServer,Database* database)
+WorldManager*	WorldManager::Init(uint32 zoneId, ZoneServer* zoneServer, Database* database)
 {
     if(!mInsFlag)
     {
-        mSingleton = new WorldManager(zoneId,zoneServer,database);
+        mSingleton = new WorldManager(zoneId, zoneServer, database);
         mInsFlag = true;
         return mSingleton;
     }
@@ -281,9 +281,9 @@ void WorldManager::Shutdown()
 #endif
         if (container)
         {
-            gLogger->log(LogManager::DEBUG,"WorldManager::Shutdown(): Deleting the Tutorial container");
+            gLogger->log(LogManager::DEBUG, "WorldManager::Shutdown(): Deleting the Tutorial container");
             this->destroyObject(container);
-            gLogger->log(LogManager::INFORMATION,"WorldManager::Shutdown(): Delete done!");
+            gLogger->log(LogManager::INFORMATION, "WorldManager::Shutdown(): Delete done!");
         }
     }
 
@@ -327,22 +327,22 @@ WorldManager::~WorldManager()
 void WorldManager::_loadBuildings()
 {
     WMAsyncContainer* asynContainer = new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_All_Buildings);
-    mDatabase->ExecuteSqlAsync(this,asynContainer,"SELECT id FROM buildings WHERE planet_id = %u;",mZoneId);
-    gLogger->log(LogManager::DEBUG, "SQL :: SELECT id FROM buildings WHERE planet_id = %u;",mZoneId); // SQL Debug Log	
+    mDatabase->ExecuteSqlAsync(this, asynContainer, "SELECT id FROM swganh_static.buildings WHERE planet_id = %u;", mZoneId);
+    gLogger->log(LogManager::DEBUG, "SQL :: SELECT id FROM swganh_static.buildings WHERE planet_id = %u;", mZoneId); // SQL Debug Log	
 }
 
 
 //======================================================================================================================
 
-void WorldManager::handleObjectReady(Object* object,DispatchClient* client)
+void WorldManager::handleObjectReady(Object* object, DispatchClient* client)
 {
     if(QTRegion* region = dynamic_cast<QTRegion*>(object))
     {
         uint32 key = (uint32)region->getId();
 
-        mQTRegionMap.insert(key,region);
+        mQTRegionMap.insert(key, region);
 
-        mSpatialIndex->insertQTRegion(key,region->mPosition.x,region->mPosition.z,region->getWidth(),region->getHeight());
+        mSpatialIndex->insertQTRegion(key, region->mPosition.x, region->mPosition.z, region->getWidth(), region->getHeight());
     }
     else
     {
@@ -365,7 +365,7 @@ RegionObject* WorldManager::getRegionById(uint64 regionId)
     if(it != mRegionMap.end())
         return((*it).second);
     else
-        gLogger->log(LogManager::NOTICE,"Worldmanager::getRegionById: Could not find region %"PRIu64"",regionId);
+        gLogger->log(LogManager::NOTICE, "Worldmanager::getRegionById: Could not find region %"PRIu64"", regionId);
 
     return(NULL);
 }
@@ -884,17 +884,19 @@ void WorldManager::_handleLoadComplete()
     mDatabase->releaseBindingPoolMemory();
     mWM_DB_AsyncPool.release_memory();
     gObjectFactory->releaseAllPoolsMemory();
-    if(mZoneId != 41)
-        gResourceManager->releaseAllPoolsMemory();
-    gSchematicManager->releaseAllPoolsMemory();
-    gSkillManager->releaseAllPoolsMemory();
 
+    if(mZoneId != 41)	// release memory allocated for non-tutorial zones
+	{
+        gResourceManager->releaseAllPoolsMemory();
+		gSchematicManager->releaseAllPoolsMemory();
+		gSkillManager->releaseAllPoolsMemory();
+	}
     
 
     // register script hooks
     _startWorldScripts();
 
-    gLogger->log(LogManager::NOTICE,"World load complete");
+    gLogger->log(LogManager::NOTICE, "World load complete");
             
     if(mZoneId != 41)
     {
@@ -910,23 +912,23 @@ void WorldManager::_handleLoadComplete()
     mTotalObjectCount = 0;
 
     // initialize timers
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handleShuttleUpdate),7,1000,NULL);
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handleServerTimeUpdate),9,gWorldConfig->getServerTimeInterval()*1000,NULL);
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handleDisconnectUpdate),1,1000,NULL);
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handleRegionUpdate),2,2000,NULL);
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handleCraftToolTimers),3,1000,NULL);
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handleNpcConversionTimers),8,1000,NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handleShuttleUpdate), 7, 1000, NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handleServerTimeUpdate), 9, gWorldConfig->getServerTimeInterval()*1000, NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handleDisconnectUpdate), 1, 1000, NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handleRegionUpdate), 2, 2000, NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handleCraftToolTimers), 3,1000, NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handleNpcConversionTimers), 8, 1000, NULL);
     
     //is this really necessary ?
     //whenever someone creates something near us were updated on it anyway ... ?
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handlePlayerMovementUpdateTimers),4,5000,NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handlePlayerMovementUpdateTimers), 4, 5000, NULL);
     
     //save player
-    setSaveTaskId(mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handlePlayerSaveTimers), 4, 120000, NULL));
+    setSaveTaskId(mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handlePlayerSaveTimers), 4, 120000, NULL));
     
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handleGeneralObjectTimers),5,2000,NULL);
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handleGroupObjectTimers),5,gWorldConfig->getGroupMissionUpdateTime(),NULL);
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handleVariousUpdates),7,1000, NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handleGeneralObjectTimers), 5, 2000, NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handleGroupObjectTimers), 5, gWorldConfig->getGroupMissionUpdateTime(), NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handleVariousUpdates), 7, 1000, NULL);
 
     // Init NPC Manager, will load lairs from the DB.
     (void)NpcManager::Instance();

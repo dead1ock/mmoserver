@@ -134,9 +134,7 @@ void TradeManager::Shutdown()
     mMessageDispatch->UnregisterMessageCallback(opDeductMoneyMessage);
     mMessageDispatch->UnregisterMessageCallback(opFindFriendRequestPosition);
     mMessageDispatch->UnregisterMessageCallback(opFindFriendCreateWaypoint);
-
     mMessageDispatch->UnregisterMessageCallback(opBankTipDeduct);
-
 }
 
 //=======================================================================================================================
@@ -181,9 +179,7 @@ void TradeManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
                 asynContainer->player1->getTrade()->updateCash(-asynContainer->amount1+asynContainer->amount2);
                 asynContainer->player2->getTrade()->updateCash(-asynContainer->amount2+asynContainer->amount1);
                 asynContainer->player1->getTrade()->endTradeSession();
-                asynContainer->player2->getTrade()->endTradeSession();
-
-                
+                asynContainer->player2->getTrade()->endTradeSession();                
             }
         break;
 
@@ -229,10 +225,7 @@ void TradeManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
 
                     //now inform the new owner that the auction has been won
                     gMessageLib->sendBoughtInstantMail(asynContainer->player1, asynContainer->name, asynContainer->mOwner, asynContainer->amount1, asynContainer->mPlanet, asynContainer->mRegion,asynContainer->mX,asynContainer->mY);
-
-
-
-                }
+					}
                 else
                 {
                     //hmmm reroll so dont change the money item is still with the old owner in  the db

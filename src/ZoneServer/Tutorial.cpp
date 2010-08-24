@@ -114,25 +114,25 @@ const uint32 DefaultQuestWeaponType = 2326; // A even more useless gun for the t
 
 //=============================================================================
 Tutorial::Tutorial(PlayerObject* player) :
-mPlayerObject(player),
-mState(0),
-mSubState(1),
-mZoomCamera(false),
-mChatBox(false),
-mFoodSelected(false),
-mFoodUsed(false),
-mCloneDataSaved(false),
-mItemsInsured(false),
-mCloseHolocron(false),
-mChangeLookAtTarget(false),
-mOpenInventory(false),
-mCloseInventory(false),
-mCellId(0),
-mNpcConversationId(0),
-mContainerEventId(0),
-mQuestWeaponFamily(DefaultQuestWeaponFamily),
-mQuestWeaponType(DefaultQuestWeaponType)
-// mSpawnedNpc(NULL)
+	mPlayerObject(player),
+	mState(0),
+	mSubState(1),
+	mZoomCamera(false),
+	mChatBox(false),
+	mFoodSelected(false),
+	mFoodUsed(false),
+	mCloneDataSaved(false),
+	mItemsInsured(false),
+	mCloseHolocron(false),
+	mChangeLookAtTarget(false),
+	mOpenInventory(false),
+	mCloseInventory(false),
+	mCellId(0),
+	mNpcConversationId(0),
+	mContainerEventId(0),
+	mQuestWeaponFamily(DefaultQuestWeaponFamily),
+	mQuestWeaponType(DefaultQuestWeaponType)
+	// mSpawnedNpc(NULL)
 {
 	// State shall be stored/fetched to/from DB.
 	
@@ -142,16 +142,16 @@ mQuestWeaponType(DefaultQuestWeaponType)
 	asContainer->mQueryType = TutorialQuery_MainData;
 	asContainer->mId = player->getId(); 
 
-	(gWorldManager->getDatabase())->ExecuteSqlAsync(this,asContainer,"SELECT character_state, character_substate, starting_profession FROM character_tutorial WHERE character_id = %I64u",player->getId());	
-	gLogger->log(LogManager::DEBUG, "SQL :: SELECT character_state, character_substate, starting_profession FROM character_tutorial WHERE character_id = %I64u",player->getId()); // SQL Debug Log
+	(gWorldManager->getDatabase())->ExecuteSqlAsync(this, asContainer, "SELECT character_state, character_substate, starting_profession FROM character_tutorial WHERE character_id = %I64u", player->getId());	
+	gLogger->log(LogManager::DEBUG, "SQL :: SELECT character_state, character_substate, starting_profession FROM character_tutorial WHERE character_id = %I64u", player->getId()); // SQL Debug Log
 }
 
 Tutorial::~Tutorial()
 {
 
 	// Save-update the state.
-	gWorldManager->getDatabase()->ExecuteSqlAsync(0,0,"UPDATE character_tutorial SET character_state=%u,character_substate=%u WHERE character_id=%"PRIu64"",mState, mSubState, mPlayerObject->getId());
-	gLogger->log(LogManager::DEBUG, "SQL :: UPDATE character_tutorial SET character_state=%u,character_substate=%u WHERE character_id=%"PRIu64"",mState, mSubState, mPlayerObject->getId()); // SQL Debug Log
+	gWorldManager->getDatabase()->ExecuteSqlAsync(0, 0, "UPDATE character_tutorial SET character_state=%u,character_substate=%u WHERE character_id=%"PRIu64"", mState, mSubState, mPlayerObject->getId());
+	gLogger->log(LogManager::DEBUG, "SQL :: UPDATE character_tutorial SET character_state=%u,character_substate=%u WHERE character_id=%"PRIu64"", mState, mSubState, mPlayerObject->getId()); // SQL Debug Log
 
 	// clear scripts
 	ScriptList::iterator scriptIt = mPlayerScripts.begin();
@@ -171,7 +171,7 @@ void Tutorial::warpToStartingLocation(BString startingLocation)
 	asContainer->mQueryType = TutorialQuery_PlanetLocation;
 	asContainer->mId = mPlayerObject->getId(); 
 
-	(gWorldManager->getDatabase())->ExecuteSqlAsync(this,asContainer,"SELECT planet_id, x, y, z FROM starting_location WHERE location LIKE '%s'", startingLocation.getAnsi());
+	(gWorldManager->getDatabase())->ExecuteSqlAsync(this, asContainer, "SELECT planet_id, x, y, z FROM starting_location WHERE location LIKE '%s'", startingLocation.getAnsi());
 	gLogger->log(LogManager::DEBUG, "SQL :: SELECT planet_id, x, y, z FROM starting_location WHERE location LIKE '%s'", startingLocation.getAnsi()); // SQL Debug Log
 }
 
@@ -184,9 +184,9 @@ void Tutorial::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
 		case TutorialQuery_MainData:
 		{
 			DataBinding* binding = gWorldManager->getDatabase()->CreateDataBinding(3);
-			binding->addField(DFT_uint32,offsetof(Tutorial,mState),4,0);
-			binding->addField(DFT_int32,offsetof(Tutorial,mSubState),4,1);
-			binding->addField(DFT_bstring,offsetof(Tutorial,mStartingProfession),64,2);
+			binding->addField(DFT_uint32, offsetof(Tutorial,mState), 4, 0);
+			binding->addField(DFT_int32, offsetof(Tutorial,mSubState), 4, 1);
+			binding->addField(DFT_bstring, offsetof(Tutorial,mStartingProfession), 64, 2);
 
 			uint64 count = result->getRowCount();
 
@@ -202,8 +202,8 @@ void Tutorial::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
 				mState = 1;
 
 				// Save the state.
-				(gWorldManager->getDatabase())->ExecuteSqlAsync(0,0,"INSERT INTO character_tutorial VALUES (%"PRIu64",%u,%u)",asyncContainer->mId,mState, mSubState);
-				gLogger->log(LogManager::DEBUG, "SQL :: INSERT INTO character_tutorial VALUES (%"PRIu64",%u,%u)",asyncContainer->mId,mState, mSubState); // SQL Debug Log
+				(gWorldManager->getDatabase())->ExecuteSqlAsync(0, 0, "INSERT INTO character_tutorial VALUES (%"PRIu64",%u,%u)", asyncContainer->mId, mState, mSubState);
+				gLogger->log(LogManager::DEBUG, "SQL :: INSERT INTO character_tutorial VALUES (%"PRIu64",%u,%u)", asyncContainer->mId, mState, mSubState); // SQL Debug Log
 			}
 			gWorldManager->getDatabase()->DestroyDataBinding(binding);
 		
@@ -571,8 +571,8 @@ void Tutorial::setState(uint32 state)
 	mState = state;
 
 	// Save-update the state.
-	gWorldManager->getDatabase()->ExecuteSqlAsync(0,0,"UPDATE character_tutorial SET character_state=%u,character_substate=%u WHERE character_id=%"PRIu64"",mState, mSubState, mPlayerObject->getId());	
-	gLogger->log(LogManager::DEBUG, "SQL :: UPDATE character_tutorial SET character_state=%u,character_substate=%u WHERE character_id=%"PRIu64"",mState, mSubState, mPlayerObject->getId());	 // SQL Debug Log	
+	gWorldManager->getDatabase()->ExecuteSqlAsync(0, 0, "UPDATE character_tutorial SET character_state=%u, character_substate=%u WHERE character_id=%"PRIu64";", mState, mSubState, mPlayerObject->getId());	
+	gLogger->log(LogManager::DEBUG, "SQL :: UPDATE character_tutorial SET character_state=%u,character_substate=%u WHERE character_id=%"PRIu64";", mState, mSubState, mPlayerObject->getId());	 // SQL Debug Log	
 
 }
 
@@ -611,8 +611,8 @@ void Tutorial::setSubState(uint32 subState)
 	mSubState = subState;
 
 	// Save-update the state.
-	gWorldManager->getDatabase()->ExecuteSqlAsync(0,0,"UPDATE character_tutorial SET character_state=%u,character_substate=%u WHERE character_id=%"PRIu64"",mState, mSubState, mPlayerObject->getId());	
-	gLogger->log(LogManager::DEBUG, "SQL :: UPDATE character_tutorial SET character_state=%u,character_substate=%u WHERE character_id=%"PRIu64"",mState, mSubState, mPlayerObject->getId());	 // SQL Debug Log	
+	gWorldManager->getDatabase()->ExecuteSqlAsync(0, 0, "UPDATE character_tutorial SET character_state=%u, character_substate=%u WHERE character_id=%"PRIu64";", mState, mSubState, mPlayerObject->getId());	
+	gLogger->log(LogManager::DEBUG, "SQL :: UPDATE character_tutorial SET character_state=%u,character_substate=%u WHERE character_id=%"PRIu64";", mState, mSubState, mPlayerObject->getId());	 // SQL Debug Log	
 
 }
 

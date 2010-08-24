@@ -212,7 +212,7 @@ void ConnectionServer::ToggleLock()
         // Update our status for the LoginServer
         mDatabase->ExecuteProcedureAsync(0, 0, "CALL sp_GalaxyStatusUpdate(%u, %u);", 2, mClusterId); // Status set to online
         gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_GalaxyStatusUpdate(%u, %u);", 2, mClusterId); // SQL Debug Log
-        gLogger->log(LogManager::INFORMATION,"unlocking server to normal users");
+        gLogger->log(LogManager::INFORMATION, "unlocking server to normal users");
     }
 }
 //======================================================================================================================
@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
         boost::this_thread::sleep(boost::posix_time::milliseconds(1));
     }
 
-    // Shutdown things
+    // Shutdown
     delete gConnectionServer;
 
     return 0;

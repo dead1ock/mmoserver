@@ -284,7 +284,7 @@ bool Datapad::addData(IntangibleObject* Data)
 	{
 		PlayerObject* player = dynamic_cast<PlayerObject*>(gWorldManager->getObjectById(this->getParentId()));	
         if (player) {
-            gMessageLib->SendSystemMessage(::common::OutOfBand("base_player","too_many_waypoints"), player);
+            gMessageLib->SendSystemMessage(::common::OutOfBand("base_player", "too_many_waypoints"), player);
         }
 		return false;
 

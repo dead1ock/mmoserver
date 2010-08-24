@@ -33,9 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "MessageLib/MessageLib.h"
 #include "Common/LogManager.h"
 
-
-
-
 //=============================================================================
 
 CampTerminal::CampTerminal() : Terminal ()
@@ -86,7 +83,7 @@ void CampTerminal::handleObjectMenuSelect(uint8 messageType,Object* srcObject)
 		time -=(minutes*60);
 		uint32 seconds = (uint32)time;
 
-		sprintf(text,"Up-Time: %u hours, %u minutes and %u seconds",hours, minutes, seconds);
+		sprintf(text, "Up-Time: %u hours, %u minutes and %u seconds", hours, minutes, seconds);
 		mAttributesMenu.push_back(text);
 
 		sprintf(text,"Total Visitors: %u ", region->getVisitors());
@@ -99,7 +96,7 @@ void CampTerminal::handleObjectMenuSelect(uint8 messageType,Object* srcObject)
 		sprintf(text,"Healing Modifier: 0.65 ");
 		mAttributesMenu.push_back(text);
 
-		gUIManager->createNewListBox(this,"handleMainMenu","Camp status","Below is a summary of the status of the camp.", mAttributesMenu,playerObject,SUI_Window_ListBox);
+		gUIManager->createNewListBox(this, "handleMainMenu", "Camp status","Below is a summary of the status of the camp.", mAttributesMenu, playerObject, SUI_Window_ListBox);
 
 		return;
 	}
@@ -115,14 +112,14 @@ void CampTerminal::prepareCustomRadialMenu(CreatureObject* creatureObject, uint8
 	RadialMenu* radial = new RadialMenu();
 
 
-	radial->addItem(1,0,radId_examine,radAction_Default);
-	radial->addItem(2,0,radId_serverTerminalManagementStatus,radAction_ObjCallback,"Status");
+	radial->addItem(1, 0, radId_examine, radAction_Default);
+	radial->addItem(2, 0, radId_serverTerminalManagementStatus, radAction_ObjCallback, "Status");
 	
 	Camp* camp = (Camp*) gWorldManager->getObjectById(this->mCampId);
 	
 	if(creatureObject->getId() == camp->getOwner())
 	{
-		radial->addItem(3,0,radId_serverTerminalManagementDestroy,radAction_ObjCallback,"Disband");
+		radial->addItem(3, 0, radId_serverTerminalManagementDestroy, radAction_ObjCallback, "Disband");
 	}
 
 	mRadialMenu = RadialMenuPtr(radial);

@@ -81,37 +81,35 @@ void WorldManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
 							_loadAllObjects(0);
 
 							// load zone regions
-							mDatabase->ExecuteSqlAsync(this,new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_ZoneRegions),"SELECT id FROM zone_regions WHERE planet_id=%u ORDER BY id;",mZoneId);
-							gLogger->log(LogManager::DEBUG, "SQL :: SELECT id FROM zone_regions WHERE planet_id=%u ORDER BY id;",mZoneId); // SQL Debug Log	
+							mDatabase->ExecuteSqlAsync(this, new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_ZoneRegions), "SELECT id FROM swganh_static.zone_regions WHERE planet_id=%u ORDER BY id;", mZoneId);
+							gLogger->log(LogManager::DEBUG, "SQL :: SELECT id FROM swganh_static.zone_regions WHERE planet_id=%u ORDER BY id;", mZoneId); // SQL Debug Log	
 						}
 						// load client effects
 						if(!mDebug)
-							mDatabase->ExecuteSqlAsync(this,new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_ClientEffects),"SELECT * FROM clienteffects ORDER BY id;");
-						gLogger->log(LogManager::DEBUG, "SQL :: SELECT * FROM clienteffects ORDER BY id;"); // SQL Debug Log	
-
-						
+							mDatabase->ExecuteSqlAsync(this, new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_ClientEffects), "SELECT * FROM swganh_static.clienteffects ORDER BY id;");
+						gLogger->log(LogManager::DEBUG, "SQL :: SELECT * FROM swganh_static.clienteffects ORDER BY id;"); // SQL Debug Log	
 
 						// load attribute keys
-						mDatabase->ExecuteSqlAsync(this,new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_AttributeKeys),"SELECT id, name FROM attributes ORDER BY id;");
+						mDatabase->ExecuteSqlAsync(this, new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_AttributeKeys), "SELECT id, name FROM attributes ORDER BY id;");
 						gLogger->log(LogManager::DEBUG, "SQL :: SELECT id, name FROM attributes ORDER BY id;"); // SQL Debug Log	
 
 						// load sounds
 						if(!mDebug)
-							mDatabase->ExecuteSqlAsync(this,new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_Sounds),"SELECT * FROM sounds ORDER BY id;");
-						gLogger->log(LogManager::DEBUG, "SQL :: SELECT * FROM sounds ORDER BY id;"); // SQL Debug Log	
+							mDatabase->ExecuteSqlAsync(this, new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_Sounds), "SELECT * FROM swganh_static.sounds ORDER BY id;");
+						gLogger->log(LogManager::DEBUG, "SQL :: SELECT * FROM swganh_static.sounds ORDER BY id;"); // SQL Debug Log	
 
 						// load moods
-						mDatabase->ExecuteSqlAsync(this,new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_Moods),"SELECT * FROM moods ORDER BY id;");
+						mDatabase->ExecuteSqlAsync(this, new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_Moods), "SELECT * FROM moods ORDER BY id;");
 						gLogger->log(LogManager::DEBUG, "SQL :: SELECT * FROM moods ORDER BY id;"); // SQL Debug Log	
 
 						// load npc converse animations
 						if(!mDebug)
-							mDatabase->ExecuteSqlAsync(this,new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_NpcConverseAnimations),"SELECT * FROM conversation_animations ORDER BY id;");
+							mDatabase->ExecuteSqlAsync(this, new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_NpcConverseAnimations), "SELECT * FROM conversation_animations ORDER BY id;");
 						gLogger->log(LogManager::DEBUG, "SQL :: SELECT * FROM conversation_animations ORDER BY id;"); // SQL Debug Log	
 
 						// load npc chatter
 						if(!mDebug)
-							mDatabase->ExecuteSqlAsync(this,new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_NpcChatter),"SELECT * FROM npc_chatter WHERE planetId=%u OR planetId=99;",mZoneId);
+							mDatabase->ExecuteSqlAsync(this, new(mWM_DB_AsyncPool.ordered_malloc()) WMAsyncContainer(WMQuery_NpcChatter),"SELECT * FROM npc_chatter WHERE planetId=%u OR planetId=99;",mZoneId);
 						gLogger->log(LogManager::DEBUG, "SQL :: SELECT * FROM npc_chatter WHERE planetId=%u OR planetId=99;",mZoneId); // SQL Debug Log	
 
 						if(mZoneId != 41)

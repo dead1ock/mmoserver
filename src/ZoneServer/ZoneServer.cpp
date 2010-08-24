@@ -126,12 +126,12 @@ ZoneServer::ZoneServer(int8* zoneName)
 	mDatabase->ExecuteProcedureAsync(0, 0, "CALL sp_ServerStatusUpdate('%s', NULL, NULL, NULL);", zoneName);
 	gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ServerStatusUpdate('%s', NULL, NULL, NULL", zoneName); // SQL Debug Log
 
-	mRouterService = mNetworkManager->GenerateService((char*)gConfig->read<std::string>("BindAddress").c_str(), gConfig->read<uint16>("BindPort"),gConfig->read<uint32>("ServiceMessageHeap")*1024,true);
+	mRouterService = mNetworkManager->GenerateService((char*)gConfig->read<std::string>("BindAddress").c_str(), gConfig->read<uint16>("BindPort"), gConfig->read<uint32>("ServiceMessageHeap")*1024, true);
 	
 	// Grab our zoneId out of the DB for this zonename.
 	uint32 zoneId = 0;
-	DatabaseResult* result = mDatabase->ExecuteSynchSql("SELECT planet_id FROM planet WHERE name=\'%s\';", zoneName);
-	gLogger->log(LogManager::DEBUG, "SQL :: SELECT planet_id FROM planet WHERE name=\'%s\';", zoneName); // SQL Debug Log
+	DatabaseResult* result = mDatabase->ExecuteSynchSql("SELECT planet_id FROM swganh_static.planet WHERE planet_name=\'%s\';", zoneName);
+	gLogger->log(LogManager::DEBUG, "SQL :: SELECT planet_id FROM swganh_static.planet WHERE name=\'%s\';", zoneName); // SQL Debug Log
 
 	if (!result->getRowCount())
 	{
@@ -156,7 +156,7 @@ ZoneServer::ZoneServer(int8* zoneName)
 	// Place all startup code here.
 	mMessageDispatch = new MessageDispatch(mRouterService);
 
-	WorldConfig::Init(zoneId,mDatabase,zoneName);
+	WorldConfig::Init(zoneId, mDatabase, zoneName);
 	ObjectControllerCommandMap::Init(mDatabase);
 	MessageLib::Init();
 	ObjectFactory::Init(mDatabase);
@@ -167,7 +167,7 @@ ZoneServer::ZoneServer(int8* zoneName)
 	//structure manager callback functions 
 	StructureManagerCommandMapClass::Init();
 
-	WorldManager::Init(zoneId,this,mDatabase);
+	WorldManager::Init(zoneId, this, mDatabase);
 
 	// Init the non persistent factories. For now we take them one-by-one here, until we have a collection of them.
 	// We can NOT create these factories among the already existing ones, if we want to have any kind of "ownership structure",
@@ -184,16 +184,16 @@ ZoneServer::ZoneServer(int8* zoneName)
 	//ArtisanManager callback
 	CraftingManager::Init(mDatabase);
 
-	UIManager::Init(mDatabase,mMessageDispatch);
+	UIManager::Init(mDatabase, mMessageDispatch);
 	CombatManager::Init(mDatabase);
-	TravelMapHandler::Init(mDatabase,mMessageDispatch,zoneId);
-	CharSheetManager::Init(mDatabase,mMessageDispatch);
-	TradeManager::Init(mDatabase,mMessageDispatch);
+	TravelMapHandler::Init(mDatabase, mMessageDispatch, zoneId);
+	CharSheetManager::Init(mDatabase, mMessageDispatch);
+	TradeManager::Init(mDatabase, mMessageDispatch);
 	BuffManager::Init(mDatabase);
 	MedicManager::Init(mMessageDispatch);
 	AdminManager::Init(mMessageDispatch);
-	EntertainerManager::Init(mDatabase,mMessageDispatch);
-	GroupManager::Init(mDatabase,mMessageDispatch);
+	EntertainerManager::Init(mDatabase, mMessageDispatch);
+	GroupManager::Init(mDatabase, mMessageDispatch);
 
 	if(zoneId != 41)
 		StructureManager::Init(mDatabase,mMessageDispatch);
@@ -204,9 +204,9 @@ ZoneServer::ZoneServer(int8* zoneName)
 
 	ScriptEngine::Init();
 
-	mCharacterLoginHandler = new CharacterLoginHandler(mDatabase,mMessageDispatch);
+	mCharacterLoginHandler = new CharacterLoginHandler(mDatabase, mMessageDispatch);
 
-	mObjectControllerDispatch = new ObjectControllerDispatch(mDatabase,mMessageDispatch);
+	mObjectControllerDispatch = new ObjectControllerDispatch(mDatabase, mMessageDispatch);
 }
 
 //======================================================================================================================
@@ -254,7 +254,7 @@ ZoneServer::~ZoneServer(void)
 	// NOW, I can feel that it should be safe to delete the data holding messages.
 	gMessageFactory->destroySingleton();
 
-	gLogger->log(LogManager::CRITICAL,"ZoneServer::Shutdown Complete\n");
+	gLogger->log(LogManager::CRITICAL, "ZoneServer::Shutdown Complete\n");
 }
 
 //======================================================================================================================
@@ -266,8 +266,8 @@ void ZoneServer::handleWMReady()
 	//gLogger->printLogo();
 	// std::string BuildString(GetBuildString());
 
-	gLogger->log(LogManager::INFORMATION,"Zone Server:%s %s",getZoneName().getAnsi(),ConfigManager::getBuildString().c_str());
-	gLogger->log(LogManager::CRITICAL,"Welcome to your SWGANH Experience!");
+	gLogger->log(LogManager::INFORMATION, "Zone Server:%s %s",getZoneName().getAnsi(),ConfigManager::getBuildString().c_str());
+	gLogger->log(LogManager::CRITICAL, "Welcome to your SWGANH Experience!");
 
 	// Connect to the ConnectionServer;
 	_connectToConnectionServer();
@@ -296,7 +296,7 @@ void ZoneServer::Process(void)
 	if (Anh_Utils::Clock::getSingleton()->getLocalTime() - mLastHeartbeat > 180000)
 	{
 		mLastHeartbeat = static_cast<uint32>(Anh_Utils::Clock::getSingleton()->getLocalTime());
-		gLogger->log(LogManager::NOTICE,"ZoneServer (%s) Heartbeat. Total  Players on zone : %i",gZoneServer->getZoneName().getAnsi(),(gWorldManager->getPlayerAccMap())->size());
+		gLogger->log(LogManager::NOTICE, "ZoneServer (%s) Heartbeat. Total  Players on zone : %i", gZoneServer->getZoneName().getAnsi(), (gWorldManager->getPlayerAccMap())->size());
 	}
 }
 

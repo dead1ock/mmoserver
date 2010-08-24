@@ -60,7 +60,7 @@ ChatManager*	ChatManager::mSingleton = NULL;
 
 //======================================================================================================================
 
-ChatManager::ChatManager(Database* database,MessageDispatch* dispatch) :
+ChatManager::ChatManager(Database* database, MessageDispatch* dispatch) :
 mDatabase(database),
 mMessageDispatch(dispatch)
 {
@@ -72,25 +72,25 @@ mMessageDispatch(dispatch)
     ChatAsyncContainer* asyncContainer = new ChatAsyncContainer(ChatQuery_GalaxyName);
     // Commented out the filter for now, at a later time this needs to be updated to not be bound to a single galaxy
     // mDatabase->ExecuteSqlAsync(this,asyncContainer,"SELECT name FROM galaxy;"); // WHERE galaxy_id=3");
-    mDatabase->ExecuteProcedureAsync(this,asyncContainer,"CALL swganh.sp_ReturnGalaxyName(2);");
-    gLogger->log(LogManager::DEBUG,"SQL :: CALL sp_ReturnChatChannelMod(2);"); // SQL Debug Log
+    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL swganh.sp_ReturnGalaxyName(2);");
+    gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ReturnChatChannelMod(2);"); // SQL Debug Log
 
     asyncContainer = new ChatAsyncContainer(ChatQuery_Channels);
-    mDatabase->ExecuteProcedureAsync(this,asyncContainer,"CALL swganh.sp_ReturnChatChannels();");
-    gLogger->log(LogManager::DEBUG,"SQL :: CALL sp_ReturnChatChannels();"); // SQL Debug Log
+    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL swganh.sp_ReturnChatChannels();");
+    gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ReturnChatChannels();"); // SQL Debug Log
 
     asyncContainer = new ChatAsyncContainer(ChatQuery_PlanetNames);
-    mDatabase->ExecuteProcedureAsync(this,asyncContainer,"CALL swganh.sp_ReturnChatPlanetNames();");
-    gLogger->log(LogManager::DEBUG,"SQL :: CALL sp_ReturnChatPlanetNames();"); // SQL Debug Log
+    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL swganh.sp_ReturnChatPlanetNames();");
+    gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ReturnChatPlanetNames();"); // SQL Debug Log
 }
 
 //======================================================================================================================
 
-ChatManager* ChatManager::Init(Database* database,MessageDispatch* dispatch)
+ChatManager* ChatManager::Init(Database* database, MessageDispatch* dispatch)
 {
     if(mInsFlag == false)
     {
-        mSingleton = new ChatManager(database,dispatch);
+        mSingleton = new ChatManager(database, dispatch);
         mInsFlag = true;
         return mSingleton;
     }
@@ -128,13 +128,13 @@ void ChatManager::_loadChannels(DatabaseResult* result)
 
         BString owner;
         Channel* channel = new Channel();
-        result->GetNextRow(mChannelBinding,channel->getChannelData());
+        result->GetNextRow(mChannelBinding, channel->getChannelData());
 
         result->ResetRowIndex(static_cast<int>(i));
-        result->GetNextRow(mCreatorBinding,&creator);
+        result->GetNextRow(mCreatorBinding, &creator);
 
         result->ResetRowIndex(static_cast<int>(i));
-        result->GetNextRow(mOwnerBinding,&owner);
+        result->GetNextRow(mOwnerBinding, &owner);
 
         if (strcmp(creator.getRawData(), "SYSTEM") == 0)
             channel->setCreator(gSystemAvatar);
@@ -162,7 +162,7 @@ void ChatManager::_loadChannels(DatabaseResult* result)
         uint32 crc = channel->getName().getCrc();
 
         mChannelNameMap.insert(std::make_pair(crc, channel));
-        mChannelMap.insert(std::make_pair(channel->getId(),channel));
+        mChannelMap.insert(std::make_pair(channel->getId(), channel));
         mvChannels.push_back(channel);
 
         ChatAsyncContainer* modContainer = new ChatAsyncContainer(ChatQuery_Moderators);
@@ -237,7 +237,7 @@ void ChatManager::_destroyDatabindings()
 
 void ChatManager::registerChannel(Channel* channel)
 {
-    mChannelMap.insert(std::make_pair(channel->getId(),channel));
+    mChannelMap.insert(std::make_pair(channel->getId(), channel));
 }
 
 //======================================================================================================================
@@ -252,7 +252,7 @@ void ChatManager::unregisterChannel(Channel* channel)
     }
     else
     {
-        gLogger->log(LogManager::CRITICAL,"Could not find channel for removing. %u",channel->getId());
+        gLogger->log(LogManager::CRITICAL, "Could not find channel for removing. %u", channel->getId());
     }
 }
 
@@ -260,42 +260,42 @@ void ChatManager::unregisterChannel(Channel* channel)
 
 void ChatManager::_registerCallbacks()
 {
-    mMessageDispatch->RegisterMessageCallback(opClusterClientConnect,std::bind(&ChatManager::_processClusterClientConnect, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opClusterClientDisconnect,std::bind(&ChatManager::_processClusterClientDisconnect, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opClusterZoneTransferCharacter,std::bind(&ChatManager::_processZoneTransfer, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatNotifySceneReady,std::bind(&ChatManager::_processWhenLoaded, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatRequestRoomlist,std::bind(&ChatManager::_processRoomlistRequest, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatCreateRoom,std::bind(&ChatManager::_processCreateRoom, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatDestroyRoom,std::bind(&ChatManager::_processDestroyRoom, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatEnterRoomById,std::bind(&ChatManager::_processEnterRoomById, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatQueryRoom,std::bind(&ChatManager::_processRoomQuery, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opClusterClientConnect, std::bind(&ChatManager::_processClusterClientConnect, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opClusterClientDisconnect, std::bind(&ChatManager::_processClusterClientDisconnect, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opClusterZoneTransferCharacter, std::bind(&ChatManager::_processZoneTransfer, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatNotifySceneReady, std::bind(&ChatManager::_processWhenLoaded, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatRequestRoomlist, std::bind(&ChatManager::_processRoomlistRequest, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatCreateRoom, std::bind(&ChatManager::_processCreateRoom, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatDestroyRoom, std::bind(&ChatManager::_processDestroyRoom, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatEnterRoomById, std::bind(&ChatManager::_processEnterRoomById, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatQueryRoom, std::bind(&ChatManager::_processRoomQuery, this, std::placeholders::_1, std::placeholders::_2));
     mMessageDispatch->RegisterMessageCallback(opChatRoomMessage, std::bind(&ChatManager::_processRoomMessage, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatSendToRoom,std::bind(&ChatManager::_processSendToRoom, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatAddModeratorToRoom,std::bind(&ChatManager::_processAddModeratorToRoom, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatInviteAvatarToRoom,std::bind(&ChatManager::_processInviteAvatarToRoom, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatUninviteFromRoom,std::bind(&ChatManager::_processUninviteAvatarFromRoom, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatRemoveModFromRoom,std::bind(&ChatManager::_processRemoveModFromRoom, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatRemoveAvatarFromRoom,std::bind(&ChatManager::_processRemoveAvatarFromRoom, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatBanAvatarFromRoom,std::bind(&ChatManager::_processBanAvatarFromRoom, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatUnbanAvatarFromRoom,std::bind(&ChatManager::_processUnbanAvatarFromRoom, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatAvatarId,std::bind(&ChatManager::_processAvatarId, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatInstantMessageToCharacter,std::bind(&ChatManager::_processInstantMessageToCharacter, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatPersistentMessageToServer,std::bind(&ChatManager::_processPersistentMessageToServer, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatRequestPersistentMessage,std::bind(&ChatManager::_processRequestPersistentMessage, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatDeletePersistentMessage,std::bind(&ChatManager::_processDeletePersistentMessage, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatFriendlistUpdate,std::bind(&ChatManager::_processFriendlistUpdate, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opChatAddFriend,std::bind(&ChatManager::_processAddFriend, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opNotifyChatAddFriend,std::bind(&ChatManager::_processNotifyChatAddFriend, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opNotifyChatRemoveFriend,std::bind(&ChatManager::_processNotifyChatRemoveFriend, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opNotifyChatAddIgnore,std::bind(&ChatManager::_processNotifyChatAddIgnore, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opNotifyChatRemoveIgnore,std::bind(&ChatManager::_processNotifyChatRemoveIgnore, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opNotifyChatFindFriend,std::bind(&ChatManager::_processFindFriendMessage, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opFindFriendSendPosition,std::bind(&ChatManager::_processFindFriendGotPosition, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opSendSystemMailMessage,std::bind(&ChatManager::_processSystemMailMessage, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opIsmGroupSay,std::bind(&ChatManager::_processGroupSaySend, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opIsmBroadcastGalaxy,std::bind(&ChatManager::_processBroadcastGalaxy, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opIsmScheduleShutdown,std::bind(&ChatManager::_processScheduleShutdown, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opIsmCancelShutdown,std::bind(&ChatManager::_processCancelScheduledShutdown, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatSendToRoom, std::bind(&ChatManager::_processSendToRoom, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatAddModeratorToRoom, std::bind(&ChatManager::_processAddModeratorToRoom, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatInviteAvatarToRoom, std::bind(&ChatManager::_processInviteAvatarToRoom, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatUninviteFromRoom, std::bind(&ChatManager::_processUninviteAvatarFromRoom, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatRemoveModFromRoom, std::bind(&ChatManager::_processRemoveModFromRoom, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatRemoveAvatarFromRoom, std::bind(&ChatManager::_processRemoveAvatarFromRoom, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatBanAvatarFromRoom, std::bind(&ChatManager::_processBanAvatarFromRoom, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatUnbanAvatarFromRoom, std::bind(&ChatManager::_processUnbanAvatarFromRoom, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatAvatarId, std::bind(&ChatManager::_processAvatarId, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatInstantMessageToCharacter, std::bind(&ChatManager::_processInstantMessageToCharacter, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatPersistentMessageToServer, std::bind(&ChatManager::_processPersistentMessageToServer, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatRequestPersistentMessage, std::bind(&ChatManager::_processRequestPersistentMessage, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatDeletePersistentMessage, std::bind(&ChatManager::_processDeletePersistentMessage, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatFriendlistUpdate, std::bind(&ChatManager::_processFriendlistUpdate, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opChatAddFriend, std::bind(&ChatManager::_processAddFriend, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opNotifyChatAddFriend, std::bind(&ChatManager::_processNotifyChatAddFriend, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opNotifyChatRemoveFriend, std::bind(&ChatManager::_processNotifyChatRemoveFriend, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opNotifyChatAddIgnore, std::bind(&ChatManager::_processNotifyChatAddIgnore, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opNotifyChatRemoveIgnore, std::bind(&ChatManager::_processNotifyChatRemoveIgnore, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opNotifyChatFindFriend, std::bind(&ChatManager::_processFindFriendMessage, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opFindFriendSendPosition, std::bind(&ChatManager::_processFindFriendGotPosition, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opSendSystemMailMessage, std::bind(&ChatManager::_processSystemMailMessage, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opIsmGroupSay, std::bind(&ChatManager::_processGroupSaySend, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opIsmBroadcastGalaxy, std::bind(&ChatManager::_processBroadcastGalaxy, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opIsmScheduleShutdown, std::bind(&ChatManager::_processScheduleShutdown, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opIsmCancelShutdown, std::bind(&ChatManager::_processCancelScheduledShutdown, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 //======================================================================================================================
@@ -354,18 +354,18 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
         case ChatQuery_FindFriend:
         {
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_uint64,0,8);
+            binding->addField(DFT_uint64, 0, 8);
 
             uint64	ret		= 0;
             uint64	count	= result->getRowCount();
 
-            result->GetNextRow(binding,&ret);
+            result->GetNextRow(binding, &ret);
             if(count == 1)
                 count = ret;
 
             mDatabase->DestroyDataBinding(binding);
 
-            _handleFindFriendDBReply(asyncContainer->mSender,count,asyncContainer->mName);
+            _handleFindFriendDBReply(asyncContainer->mSender, count, asyncContainer->mName);
 
         }
         break;
@@ -378,22 +378,22 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             {
                 Player* player = (*it).second;
 
-                result->GetNextRow(mPlayerBinding,player->getPlayerData());
+                result->GetNextRow(mPlayerBinding, player->getPlayerData());
 
                 player->setKey();
 
-                mPlayerNameMap.insert(std::make_pair(player->getKey(),player));
+                mPlayerNameMap.insert(std::make_pair(player->getKey(), player));
 
                 // query friendslist
                 ChatAsyncContainer* asContainer = new ChatAsyncContainer(ChatQuery_PlayerFriends);
                 asContainer->mClient = asyncContainer->mClient;
                 asContainer->mReceiver	= player;
 
-                mDatabase->ExecuteProcedureAsync(this,asContainer,"CALL swganh.sp_ReturnChatFriendlist(%"PRIu64");",asContainer->mReceiver->getCharId());
-                gLogger->log(LogManager::DEBUG,"SQL :: CALL sp_ReturnChatFriendlist(%"PRIu64");", asContainer->mReceiver->getCharId()); // SQL Debug Log
+                mDatabase->ExecuteProcedureAsync(this, asContainer, "CALL swganh.sp_ReturnChatFriendlist(%"PRIu64");", asContainer->mReceiver->getCharId());
+                gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ReturnChatFriendlist(%"PRIu64");", asContainer->mReceiver->getCharId()); // SQL Debug Log
             }
             else
-                gLogger->log(LogManager::NOTICE,"Could not find account %u",asyncContainer->mClient->getAccountId());
+                gLogger->log(LogManager::NOTICE,"Could not find account %u", asyncContainer->mClient->getAccountId());
         }
         break;
 
@@ -407,11 +407,11 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             }
 
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_bstring,0,64);
+            binding->addField(DFT_bstring, 0, 64);
 
             result->GetNextRow(binding,&mGalaxyName);
 
-            gLogger->log(LogManager::DEBUG,"Main: [%s] Galaxy: [%s]",mMainCategory.getAnsi(),mGalaxyName.getAnsi());
+            gLogger->log(LogManager::DEBUG,"Main: [%s] Galaxy: [%s]", mMainCategory.getAnsi(), mGalaxyName.getAnsi());
 
             mDatabase->DestroyDataBinding(binding);
         }
@@ -422,11 +422,11 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
         {
             uint64 receiverId = 0;
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_uint64,0,8);
+            binding->addField(DFT_uint64, 0, 8);
 
             if(result->getRowCount())
             {
-                result->GetNextRow(binding,&receiverId);
+                result->GetNextRow(binding, &receiverId);
 
                 ChatAsyncContainer* asContainer = new ChatAsyncContainer(ChatQuery_CreateMail);
                 asContainer->mMail = asyncContainer->mMail;
@@ -437,33 +437,34 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
                 int8 sql[20000],*sqlPointer;
                 int8 footer[64];
                 int8 receiverStr[64];
-                sprintf(receiverStr,"',%"PRIu64",'",receiverId);
-                sprintf(footer,",%u,%"PRIu32")",(asyncContainer->mMail->mAttachments.getLength() << 1),asyncContainer->mMail->mTime);
-                sprintf(sql,"SELECT sf_MailCreate('");
+                sprintf(receiverStr,"',%"PRIu64",'", receiverId);
+                sprintf(footer,",%u,%"PRIu32")", (asyncContainer->mMail->mAttachments.getLength() << 1), asyncContainer->mMail->mTime);
+                sprintf(sql, "SELECT sf_MailCreate('");
 
                 sqlPointer = sql + strlen(sql);
 
                 //if a system send Mail, the sender may be NULL
 
 
-                sqlPointer += mDatabase->Escape_String(sqlPointer,asyncContainer->mMail->getSender().getAnsi(),asyncContainer->mMail->getSender().getLength());
+                sqlPointer += mDatabase->Escape_String(sqlPointer, asyncContainer->mMail->getSender().getAnsi(), asyncContainer->mMail->getSender().getLength());
 
                 strcat(sql,receiverStr);
                 sqlPointer = sql + strlen(sql);
-                sqlPointer += mDatabase->Escape_String(sqlPointer,asyncContainer->mMail->mSubject.getAnsi(),asyncContainer->mMail->mSubject.getLength());
+                sqlPointer += mDatabase->Escape_String(sqlPointer, asyncContainer->mMail->mSubject.getAnsi(), asyncContainer->mMail->mSubject.getLength());
                 *sqlPointer++ = '\'';
                 *sqlPointer++ = ',';
                 *sqlPointer++ = '\'';
-                sqlPointer += mDatabase->Escape_String(sqlPointer,asyncContainer->mMail->mText.getAnsi(),asyncContainer->mMail->mText.getLength());
+                sqlPointer += mDatabase->Escape_String(sqlPointer, asyncContainer->mMail->mText.getAnsi(), asyncContainer->mMail->mText.getLength());
                 *sqlPointer++ = '\'';
                 *sqlPointer++ = ',';
                 *sqlPointer++ = '\'';
-                sqlPointer += mDatabase->Escape_String(sqlPointer,asyncContainer->mMail->mAttachments.getRawData(),(asyncContainer->mMail->mAttachments.getLength() << 1));
+                sqlPointer += mDatabase->Escape_String(sqlPointer, asyncContainer->mMail->mAttachments.getRawData(), (asyncContainer->mMail->mAttachments.getLength() << 1));
                 *sqlPointer++ = '\'';
                 *sqlPointer++ = '\0';
                 strcat(sql,footer);
 
-                mDatabase->ExecuteSqlAsync(this,asContainer,sql);
+				mDatabase->ExecuteSqlAsync(this, asContainer, sql);
+				gLogger->log(LogManager::DEBUG,"SQL :: ", sql); // SQL Debug Log
             }
             else
             {
@@ -482,9 +483,9 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
         {
             uint32 dbMailId = 0;
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_uint32,0,4);
+            binding->addField(DFT_uint32, 0, 4);
 
-            result->GetNextRow(binding,&dbMailId);
+            result->GetNextRow(binding, &dbMailId);
 
             // query ignoreslist
             ChatAsyncContainer* asContainer = new ChatAsyncContainer(ChatMailQuery_PlayerIgnores);
@@ -495,8 +496,8 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             asContainer->mMailCounter = asyncContainer->mMailCounter;
             asContainer->mReceiverId = asyncContainer->mReceiverId;
 
-            mDatabase->ExecuteProcedureAsync(this,asContainer,"CALL swganh.sp_ReturnChatIgnoreList(%"PRIu64");", asyncContainer->mReceiverId);
-            gLogger->log(LogManager::DEBUG,"SQL :: CALL sp_ReturnChatIgnoreList(%"PRIu64");", asyncContainer->mReceiverId); // SQL Debug Log
+            mDatabase->ExecuteProcedureAsync(this, asContainer, "CALL swganh.sp_ReturnChatIgnoreList(%"PRIu64");", asyncContainer->mReceiverId);
+            gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ReturnChatIgnoreList(%"PRIu64");", asyncContainer->mReceiverId); // SQL Debug Log
             mDatabase->DestroyDataBinding(binding);
         }
         break;
@@ -507,7 +508,7 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             Message* newMessage;
             BString	name;
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_bstring,0,64);
+            binding->addField(DFT_bstring, 0, 64);
 
             uint64 count = result->getRowCount();
 
@@ -517,13 +518,13 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
 
             for(uint64 i = 0;i < count;i++)
             {
-                result->GetNextRow(binding,&name);
+                result->GetNextRow(binding, &name);
                 name.toLower();
                 if (receiver)
                 {
                     gLogger->log(LogManager::DEBUG," %s ChatMailQuery_PlayerIgnores [%s]", receiver->getName().getAnsi(), name.getAnsi());
                 }
-                ignoreList.insert(std::make_pair(name.getCrc(),name.getAnsi()));
+                ignoreList.insert(std::make_pair(name.getCrc(), name.getAnsi()));
             }
 
             bool bIgnore = false;
@@ -563,7 +564,7 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
                 newMessage = gMessageFactory->EndMessage();
 
 
-                ((asyncContainer->mSender)->getClient())->SendChannelA(newMessage,((asyncContainer->mSender)->getClient())->getAccountId(),CR_Client,3);
+                ((asyncContainer->mSender)->getClient())->SendChannelA(newMessage,((asyncContainer->mSender)->getClient())->getAccountId(), CR_Client, 3);
             }
 
             SAFE_DELETE(asyncContainer->mMail);
@@ -576,7 +577,7 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
         {
             if(!result->getRowCount())
             {
-                gLogger->log(LogManager::DEBUG," not found mail with id %u",asyncContainer->mRequestId);
+                gLogger->log(LogManager::DEBUG, " not found mail with id %u", asyncContainer->mRequestId);
                 SAFE_DELETE(asyncContainer);
                 return;
             }
@@ -584,7 +585,7 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             mail.mSubject.setLength(512);
             mail.mText.setLength(8192);
 
-            result->GetNextRow(mMailBinding,&mail);
+            result->GetNextRow(mMailBinding, &mail);
 
             memcpy(mail.mAttachments.getRawData(), mail.mAttachmentRaw, mail.mAttachmentSize);
 
@@ -592,11 +593,11 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             mail.mSubject.convert(BSTRType_Unicode16);
             mail.mText.convert(BSTRType_Unicode16);
 
-            gChatMessageLib->sendChatPersistantMessagetoClient(asyncContainer->mClient,&mail);
+            gChatMessageLib->sendChatPersistantMessagetoClient(asyncContainer->mClient, &mail);
 
             //mDatabase->ExecuteSqlAsync(NULL,NULL,"UPDATE chat_mail SET status = 1 WHERE id=%u", mail.mId);
             mDatabase->ExecuteProcedureAsync(NULL, NULL, "CALL sp_MailStatusUpdate(%u)", mail.mId);
-            gLogger->log(LogManager::DEBUG,"SQL :: CALL sp_MailStatusUpdate(%u);", asyncContainer->mRequestId); // SQL Debug Log
+            gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_MailStatusUpdate(%u);", asyncContainer->mRequestId); // SQL Debug Log
 
         }
         break;
@@ -609,16 +610,16 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             // Update client with all mail.
             for(uint64 i = 0;i < count;i++)
             {
-                result->GetNextRow(mMailHeaderBinding,&mail);
+                result->GetNextRow(mMailHeaderBinding, &mail);
                 mail.mSubject.convert(BSTRType_Unicode16);
 
                 if(!mail.mStatus)
                 {
-                    gChatMessageLib->sendChatPersistantMessagetoClient(asyncContainer->mClient,&mail, mail.mId,1,MailStatus_New);
+                    gChatMessageLib->sendChatPersistantMessagetoClient(asyncContainer->mClient, &mail, mail.mId, 1, MailStatus_New);
                 }
                 else
                 {
-                    gChatMessageLib->sendChatPersistantMessagetoClient(asyncContainer->mClient,&mail, mail.mId,1,MailStatus_Read);
+                    gChatMessageLib->sendChatPersistantMessagetoClient(asyncContainer->mClient,&mail, mail.mId, 1, MailStatus_Read);
                 }
             }
         }
@@ -630,15 +631,15 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             Player*	player = asyncContainer->mReceiver;
 
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_bstring,0,64);
+            binding->addField(DFT_bstring, 0, 64);
 
             uint64 count = result->getRowCount();
 
             for(uint64 i = 0;i < count;i++)
             {
-                result->GetNextRow(binding,&name);
+                result->GetNextRow(binding, &name);
                 name.toLower();
-                player->getFriendsList()->insert(std::make_pair(name.getCrc(),name.getAnsi()));
+                player->getFriendsList()->insert(std::make_pair(name.getCrc(), name.getAnsi()));
             }
 
             mDatabase->DestroyDataBinding(binding);
@@ -657,8 +658,8 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             asContainer->mClient	= asyncContainer->mClient;
             asContainer->mReceiver	= asyncContainer->mReceiver;
 
-            mDatabase->ExecuteProcedureAsync(this,asContainer,"CALL swganh.sp_ReturnChatIgnorelist(%"PRIu64");",asContainer->mReceiver->getCharId());
-            gLogger->log(LogManager::DEBUG,"SQL :: CALL sp_ReturnChatIgnorelist(%"PRIu64");",asContainer->mReceiver->getCharId()); // SQL Debug Log
+            mDatabase->ExecuteProcedureAsync(this, asContainer, "CALL swganh.sp_ReturnChatIgnorelist(%"PRIu64");", asContainer->mReceiver->getCharId());
+            gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ReturnChatIgnorelist(%"PRIu64");", asContainer->mReceiver->getCharId()); // SQL Debug Log
         }
         break;
 
@@ -668,13 +669,13 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             Player*	player = asyncContainer->mReceiver;
 
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_bstring,0,64);
+            binding->addField(DFT_bstring, 0, 64);
 
             uint64 count = result->getRowCount();
 
             for(uint64 i = 0;i < count;i++)
             {
-                result->GetNextRow(binding,&name);
+                result->GetNextRow(binding, &name);
                 name.toLower();
                 player->getIgnoreList()->insert(std::make_pair(name.getCrc(),name.getAnsi()));
             }
@@ -695,14 +696,14 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
         case ChatQuery_CharChannels:
         {
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_uint32,0,4);
+            binding->addField(DFT_uint32, 0, 4);
             uint32 roomId;
 
             uint64 count = result->getRowCount();
 
             for(uint64 i = 0;i < count;i++)
             {
-                result->GetNextRow(binding,&roomId);
+                result->GetNextRow(binding, &roomId);
                 Channel* channel = getChannelById(roomId);
                 Player* player = getPlayerByAccId(asyncContainer->mClient->getAccountId());
                 if(player == NULL)
@@ -743,11 +744,11 @@ void ChatManager::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
             //Player*	mReceiver = asyncContainer->mReceiver;
 
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_bstring,0,64);
-            result->GetNextRow(binding,&name);
+            binding->addField(DFT_bstring, 0, 64);
+            result->GetNextRow(binding, &name);
 
             //_processPersistentMessageToServer(asyncContainer->mMail,asyncContainer->mClient);
-            _PersistentMessagebySystem(asyncContainer->mMail,asyncContainer->mClient,name);
+            _PersistentMessagebySystem(asyncContainer->mMail, asyncContainer->mClient,name);
 
             mDatabase->DestroyDataBinding(binding);
         }
