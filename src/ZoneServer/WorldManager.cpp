@@ -387,21 +387,21 @@ uint64 WorldManager::GetCurrentGlobalTick()
 void WorldManager::LoadCurrentGlobalTick()
 {
     uint64 Tick;
-    DatabaseResult* temp = mDatabase->ExecuteSynchSql("SELECT Global_Tick_Count FROM galaxy WHERE galaxy_id = '2'");
-    gLogger->log(LogManager::DEBUG, "SQL :: SELECT Global_Tick_Count FROM galaxy WHERE galaxy_id = '2'"); // SQL Debug Log	
+    DatabaseResult* temp = mDatabase->ExecuteSynchSql("SELECT Global_Tick_Count FROM swganh_config.galaxy WHERE galaxy_id = '2'");
+    gLogger->log(LogManager::DEBUG, "SQL :: SELECT Global_Tick_Count FROM swganh_config.galaxy WHERE galaxy_id = '2'"); // SQL Debug Log	
 
     DataBinding*	tickbinding = mDatabase->CreateDataBinding(1);
-    tickbinding->addField(DFT_uint64,0,8,0);
+    tickbinding->addField(DFT_uint64, 0, 8, 0);
 
-    temp->GetNextRow(tickbinding,&Tick);
+    temp->GetNextRow(tickbinding, &Tick);
     mDatabase->DestroyDataBinding(tickbinding);
     mDatabase->DestroyResult(temp);
 
     char strtemp[100];
-    sprintf(strtemp, "Current Global Tick Count = %"PRIu64"",Tick);
-    gLogger->log(LogManager::INFORMATION,strtemp, FOREGROUND_GREEN);
+    sprintf(strtemp, "Current Global Tick Count = %"PRIu64"", Tick);
+    gLogger->log(LogManager::INFORMATION, strtemp, FOREGROUND_GREEN);
     mTick = Tick;
-    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this,&WorldManager::_handleTick),7,1000,NULL);
+    mSubsystemScheduler->addTask(fastdelegate::MakeDelegate(this, &WorldManager::_handleTick), 7, 1000, NULL);
 }
 
 //======================================================================================================================

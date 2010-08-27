@@ -72,8 +72,8 @@ mMessageDispatch(dispatch)
     ChatAsyncContainer* asyncContainer = new ChatAsyncContainer(ChatQuery_GalaxyName);
     // Commented out the filter for now, at a later time this needs to be updated to not be bound to a single galaxy
     // mDatabase->ExecuteSqlAsync(this,asyncContainer,"SELECT name FROM galaxy;"); // WHERE galaxy_id=3");
-    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL swganh.sp_ReturnGalaxyName(2);");
-    gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ReturnChatChannelMod(2);"); // SQL Debug Log
+    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL swganh_config.sp_ReturnGalaxyName(2);");
+    gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh_config.sp_ReturnGalaxyName(2);"); // SQL Debug Log
 
     asyncContainer = new ChatAsyncContainer(ChatQuery_Channels);
     mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL swganh.sp_ReturnChatChannels();");

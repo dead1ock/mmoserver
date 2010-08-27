@@ -123,8 +123,8 @@ ZoneServer::ZoneServer(int8* zoneName)
 										   (int8*)(gConfig->read<std::string>("DBName")).c_str());
 
 	// increase the server start that will help us to organize our logs to the corresponding serverstarts (mostly for errors)
-	mDatabase->ExecuteProcedureAsync(0, 0, "CALL sp_ServerStatusUpdate('%s', NULL, NULL, NULL);", zoneName);
-	gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ServerStatusUpdate('%s', NULL, NULL, NULL", zoneName); // SQL Debug Log
+	mDatabase->ExecuteProcedureAsync(0, 0, "CALL swganh_config.sp_ServerStatusUpdate('%s', NULL, NULL, NULL);", zoneName);
+	gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh_config.sp_ServerStatusUpdate('%s', NULL, NULL, NULL", zoneName); // SQL Debug Log
 
 	mRouterService = mNetworkManager->GenerateService((char*)gConfig->read<std::string>("BindAddress").c_str(), gConfig->read<uint16>("BindPort"), gConfig->read<uint32>("ServiceMessageHeap")*1024, true);
 	
@@ -305,8 +305,8 @@ void ZoneServer::Process(void)
 void ZoneServer::_updateDBServerList(uint32 status)
 {
 	// Update the DB with our status.  This must be synchronous as the connection server relies on this data.
-	mDatabase->ExecuteProcedure("CALL sp_ServerStatusUpdate('%s', %u, '%s', %u)", mZoneName.getAnsi(), status, mRouterService->getLocalAddress(), mRouterService->getLocalPort());
-	gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ServerStatusUpdate('%s', %u, '%s', %u);", mZoneName.getAnsi(), status, mRouterService->getLocalAddress(), mRouterService->getLocalPort()); // SQL Debug Log
+	mDatabase->ExecuteProcedure("CALL swganh_config.sp_ServerStatusUpdate('%s', %u, '%s', %u)", mZoneName.getAnsi(), status, mRouterService->getLocalAddress(), mRouterService->getLocalPort());
+	gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh_config.sp_ServerStatusUpdate('%s', %u, '%s', %u);", mZoneName.getAnsi(), status, mRouterService->getLocalAddress(), mRouterService->getLocalPort()); // SQL Debug Log
 }
 
 //======================================================================================================================
@@ -326,8 +326,8 @@ void ZoneServer::_connectToConnectionServer(void)
 	binding->addField(DFT_uint32, offsetof(ProcessAddress, mActive), 4);
 
 	// Execute our statement
-	DatabaseResult* result = mDatabase->ExecuteSynchSql("SELECT id, address, port, status, active FROM config_process_list WHERE name='connection';");
-	gLogger->log(LogManager::DEBUG, "SQL :: SELECT id, address, port, status, active FROM config_process_list WHERE name='connection';"); // SQL Debug Log
+	DatabaseResult* result = mDatabase->ExecuteSynchSql("SELECT id, address, port, status, active FROM swganh_config.config_process_list WHERE name='connection';");
+	gLogger->log(LogManager::DEBUG, "SQL :: SELECT id, address, port, status, active FROM swganh_config.config_process_list WHERE name='connection';"); // SQL Debug Log
 	uint32 count = static_cast<uint32>(result->getRowCount());
 
 	// If we found them

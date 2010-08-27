@@ -293,12 +293,12 @@ void CharacterAdminHandler::_processCreateCharacter(Message* message, DispatchCl
 
   if(bioSize)
   {
-      characterInfo.mBiography = strRep(std::string(characterInfo.mBiography.getAnsi()),"'","''").c_str();
-      characterInfo.mBiography = strRep(std::string(characterInfo.mBiography.getAnsi()),"\"","\"\"").c_str();
-      characterInfo.mBiography = strRep(std::string(characterInfo.mBiography.getAnsi()),"\\","\\\\").c_str();
+      characterInfo.mBiography = strRep(std::string(characterInfo.mBiography.getAnsi()), "'", "''").c_str();
+      characterInfo.mBiography = strRep(std::string(characterInfo.mBiography.getAnsi()), "\"", "\"\"").c_str();
+      characterInfo.mBiography = strRep(std::string(characterInfo.mBiography.getAnsi()), "\\", "\\\\").c_str();
 
-      sprintf(sql2,",'%s'",characterInfo.mBiography.getAnsi());
-      strcat(sql,sql2);
+      sprintf(sql2, ",'%s'", characterInfo.mBiography.getAnsi());
+      strcat(sql, sql2);
   }
   else
       strcat(sql,",NULL");
@@ -316,33 +316,33 @@ void CharacterAdminHandler::_processCreateCharacter(Message* message, DispatchCl
 
   if(characterInfo.mHairModel.getLength())
   {
-      sprintf(sql2,",'%s',%u,%u", characterInfo.mHairModel.getAnsi(),characterInfo.mHairCustomization[1],characterInfo.mHairCustomization[2]);
+      sprintf(sql2, ",'%s',%u,%u", characterInfo.mHairModel.getAnsi(), characterInfo.mHairCustomization[1], characterInfo.mHairCustomization[2]);
   }
 
   else
   {
-    sprintf(sql2,",NULL,0,0");
+    sprintf(sql2, ", NULL, 0, 0");
 
   }
 
   int8 sql3[128];
 
-  sprintf(sql3,",'%s');",characterInfo.mBaseModel.getAnsi());
+  sprintf(sql3, ",'%s');", characterInfo.mBaseModel.getAnsi());
 
 
-  strcat(sql2,sql3);
+  strcat(sql2, sql3);
   strcat(sql, sql2);
 
   //Logging the character create sql for debugging purposes,beware this contains binary data
-  gLogger->log(LogManager::DEBUG,"SQL :: %s", sql);
+  gLogger->log(LogManager::DEBUG, "SQL :: %s", sql);
 
-  CAAsyncContainer* asyncContainer = new CAAsyncContainer(CAQuery_CreateCharacter,client);
+  CAAsyncContainer* asyncContainer = new CAAsyncContainer(CAQuery_CreateCharacter, client);
   mDatabase->ExecuteProcedureAsync(this, asyncContainer, sql);
 }
 
 //======================================================================================================================
 
-void CharacterAdminHandler::handleDatabaseJobComplete(void* ref,DatabaseResult* result)
+void CharacterAdminHandler::handleDatabaseJobComplete(void* ref, DatabaseResult* result)
 {
     CAAsyncContainer* asyncContainer = reinterpret_cast<CAAsyncContainer*>(ref);
     switch(asyncContainer->mQueryType)
@@ -350,18 +350,18 @@ void CharacterAdminHandler::handleDatabaseJobComplete(void* ref,DatabaseResult* 
         case CAQuery_CreateCharacter:
         {
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_uint64,0,8);
+            binding->addField(DFT_uint64, 0, 8);
 
             uint64 queryResult;
-            result->GetNextRow(binding,&queryResult);
+            result->GetNextRow(binding, &queryResult);
 
             if(queryResult >= 0x0000000200000000ULL)
             {
-                _sendCreateCharacterSuccess(queryResult,asyncContainer->mClient);
+                _sendCreateCharacterSuccess(queryResult, asyncContainer->mClient);
             }
             else
             {
-                _sendCreateCharacterFailed(static_cast<uint32>(queryResult),asyncContainer->mClient);
+                _sendCreateCharacterFailed(static_cast<uint32>(queryResult), asyncContainer->mClient);
             }
 
             mDatabase->DestroyDataBinding(binding);
@@ -372,13 +372,13 @@ void CharacterAdminHandler::handleDatabaseJobComplete(void* ref,DatabaseResult* 
         {
             Message* newMessage;
 
-            BString randomName,ui,state;
+            BString randomName, ui,state;
             ui = "ui";
             state = "name_approved";
 
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_bstring,0,64);
-            result->GetNextRow(binding,&randomName);
+            binding->addField(DFT_bstring, 0, 64);
+            result->GetNextRow(binding, &randomName);
             randomName.convert(BSTRType_Unicode16);
 
             gMessageFactory->StartMessage();
@@ -424,7 +424,7 @@ void CharacterAdminHandler::_parseHairData(Message* message, CharacterCreateInfo
 
               startindex = message->getUint8();
               endindex = message->getUint8();
-              gLogger->log(LogManager::DEBUG,"StartIndex : %u   : EndIndex %u", startindex, endindex);
+              gLogger->log(LogManager::DEBUG, "StartIndex : %u   : EndIndex %u", startindex, endindex);
               dataIndex = 2;
           }
 
@@ -458,7 +458,7 @@ void CharacterAdminHandler::_parseHairData(Message* message, CharacterCreateInfo
 
             // Set our attribute value
             info->mHairCustomization[attributeIndex] = ((uint16)valueHighByte << 8) | valueLowByte;
-            gLogger->log(LogManager::DEBUG,"Hair Customization Index : %u   : data %u", attributeIndex,info->mHairCustomization[attributeIndex]);
+            gLogger->log(LogManager::DEBUG, "Hair Customization Index : %u   : data %u", attributeIndex, info->mHairCustomization[attributeIndex]);
           }
 
           /* uint16 end2  = */message->getUint16();
@@ -554,7 +554,7 @@ void CharacterAdminHandler::_parseAppearanceData(Message* message, CharacterCrea
 
 //======================================================================================================================
 
-void CharacterAdminHandler::_sendCreateCharacterSuccess(uint64 characterId,DispatchClient* client)
+void CharacterAdminHandler::_sendCreateCharacterSuccess(uint64 characterId, DispatchClient* client)
 {
     if(!client)
     {
@@ -577,7 +577,7 @@ void CharacterAdminHandler::_sendCreateCharacterSuccess(uint64 characterId,Dispa
 
 //======================================================================================================================
 
-void CharacterAdminHandler::_sendCreateCharacterFailed(uint32 errorCode,DispatchClient* client)
+void CharacterAdminHandler::_sendCreateCharacterFailed(uint32 errorCode, DispatchClient* client)
 {
 	if(!client)
 	{

@@ -131,8 +131,8 @@ TradeManagerChatHandler::TradeManagerChatHandler(Database* database, MessageDisp
     asyncContainer = new TradeManagerAsyncContainer(TRMQuery_LoadGlobalTick, 0);
 
     // @todo Hardcoded galaxy at this time, to be changed.
-    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL sp_ServerGlobalTickGet (%u);", 2); 
-    gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ServerGlobalTickGet (%u);", 2);  // SQL Debug Log
+    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL swganh_config.sp_ServerGlobalTickGet (%u);", 2); 
+    gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh_config.sp_ServerGlobalTickGet (%u);", 2);  // SQL Debug Log
 
     //load the TypeList to properly sort our items in Bazzarcategories
     //asyncContainer = new TradeManagerAsyncContainer(TRMQuery_TypeList,0);
@@ -192,8 +192,8 @@ void TradeManagerChatHandler::Shutdown()
     // save our global tick
 
     // @todo Hardcoded galaxy at this time, to be changed. 
-    mDatabase->ExecuteProcedureAsync(this, NULL, "CALL sp_ServerGlobalTickUpdate(%u, '%"PRIu64"');", 2, getGlobalTickCount());
-    gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ServerGlobalTickUpdate(%u, '%"PRIu64"');", 2, getGlobalTickCount());  // SQL Debug Log
+    mDatabase->ExecuteProcedureAsync(this, NULL, "CALL swganh_config.sp_ServerGlobalTickUpdate(%u, '%"PRIu64"');", 2, getGlobalTickCount());
+    gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh_config.sp_ServerGlobalTickUpdate(%u, '%"PRIu64"');", 2, getGlobalTickCount());  // SQL Debug Log
 
     mMessageDispatch->UnregisterMessageCallback(opIsVendorMessage);
     mMessageDispatch->UnregisterMessageCallback(opAuctionQueryHeadersMessage);
@@ -1842,8 +1842,8 @@ void TradeManagerChatHandler::handleGlobalTickPreserve()
 {
     TradeManagerAsyncContainer* asyncContainer = new TradeManagerAsyncContainer(TRMQuery_SaveGlobalTick, 0);
 
-    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL sp_ServerGlobalTickUpdate (%u, '%"PRIu64"');", 2, getGlobalTickCount());
-    gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_ServerGlobalTickUpdate(%u, '%"PRIu64"');", 2, getGlobalTickCount());  // SQL Debug Log
+    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL swganh_config.sp_ServerGlobalTickUpdate (%u, '%"PRIu64"');", 2, getGlobalTickCount());
+    gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh_config.sp_ServerGlobalTickUpdate(%u, '%"PRIu64"');", 2, getGlobalTickCount());  // SQL Debug Log
 }
 
 //=======================================================================================================================

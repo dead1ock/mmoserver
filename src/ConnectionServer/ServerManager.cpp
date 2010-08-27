@@ -128,7 +128,7 @@ NetworkClient* ServerManager::handleSessionConnect(Session* session, Service* se
 
     // Execute our statement
     int8 sql[500];
-    sprintf(sql,"SELECT id, address, port, status, active FROM config_process_list WHERE address='%s' AND port=%u;", session->getAddressString(), session->getPortHost());
+    sprintf(sql,"SELECT id, address, port, status, active FROM swganh_config.config_process_list WHERE address='%s' AND port=%u;", session->getAddressString(), session->getPortHost());
     DatabaseResult* result = mDatabase->ExecuteSynchSql(sql);
     gLogger->log(LogManager::DEBUG, "SQL :: %s", sql); // SQL Debug Log
     gLogger->logCont(LogManager::DEBUG,"\n");
@@ -164,8 +164,8 @@ NetworkClient* ServerManager::handleSessionConnect(Session* session, Service* se
             ++mTotalConnectedServers;
             if(mTotalConnectedServers == mTotalActiveServers)
             {
-                mDatabase->ExecuteProcedureAsync(0, 0, "CALL sp_GalaxyStatusUpdate(%u, %u);", 2, mClusterId); // Set status to online
-                gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_GalaxyStatusUpdate(%u, %u);", 2, mClusterId); // SQL Debug Log
+                mDatabase->ExecuteProcedureAsync(0, 0, "CALL swganh_config.sp_GalaxyStatusUpdate(%u, %u);", 2, mClusterId); // Set status to online
+                gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh_config.sp_GalaxyStatusUpdate(%u, %u);", 2, mClusterId); // SQL Debug Log
             }
         }
     }
@@ -208,8 +208,8 @@ void ServerManager::handleSessionDisconnect(NetworkClient* client)
     if(mServerAddressMap[connClient->getServerId()].mActive)
     {
         --mTotalConnectedServers;
-        mDatabase->ExecuteProcedureAsync(0, 0, "CALL sp_GalaxyStatusUpdate(%u, %u);", 1, mClusterId); // Set status to online
-        gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_GalaxyStatusUpdate(%u, %u);", 1, mClusterId); // SQL Debug Log
+        mDatabase->ExecuteProcedureAsync(0, 0, "CALL swganh_config.sp_GalaxyStatusUpdate(%u, %u);", 1, mClusterId); // Set status to online
+        gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh_config.sp_GalaxyStatusUpdate(%u, %u);", 1, mClusterId); // SQL Debug Log
     }
 
     gLogger->log(LogManager::DEBUG,"Servermanager handle server down\n");
@@ -279,8 +279,8 @@ void ServerManager::_loadProcessAddressMap(void)
     ServerAddress   serverAddress;
 
     // retrieve our list of process addresses.
-    DatabaseResult* result = mDatabase->ExecuteSynchSql("SELECT id, address, port, status, active FROM config_process_list WHERE active=1 ORDER BY id;");
-    gLogger->log(LogManager::DEBUG, "SQL :: SELECT id, address, port, status, active FROM config_process_list WHERE active=1 ORDER BY id;"); // SQL Debug Log
+    DatabaseResult* result = mDatabase->ExecuteSynchSql("SELECT id, address, port, status, active FROM swganh_config.config_process_list WHERE active=1 ORDER BY id;");
+    gLogger->log(LogManager::DEBUG, "SQL :: SELECT id, address, port, status, active FROM swganh_config.config_process_list WHERE active=1 ORDER BY id;"); // SQL Debug Log
 
     mTotalActiveServers = static_cast<uint32>(result->getRowCount());
 
