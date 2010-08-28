@@ -112,15 +112,15 @@ TradeManagerChatHandler::TradeManagerChatHandler(Database* database, MessageDisp
     mPlayerAccountMap = mChatManager->getPlayerAccountMap();
     TradeManagerAsyncContainer* asyncContainer;
 
-    mMessageDispatch->RegisterMessageCallback(opIsVendorMessage,std::bind(&TradeManagerChatHandler::processHandleIsVendorMessage, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opAuctionQueryHeadersMessage,std::bind(&TradeManagerChatHandler::processHandleopAuctionQueryHeadersMessage, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opGetAuctionDetails,std::bind(&TradeManagerChatHandler::processGetAuctionDetails, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opCancelLiveAuctionMessage,std::bind(&TradeManagerChatHandler::processCancelLiveAuctionMessage, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opRetrieveAuctionItemMessage,std::bind(&TradeManagerChatHandler::processRetrieveAuctionItemMessage, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opProcessCreateAuction,std::bind(&TradeManagerChatHandler::ProcessCreateAuction, this, std::placeholders::_1, std::placeholders::_2));
-    //mMessageDispatch->RegisterMessageCallback(opGetCommoditiesTypeList,std::bind(&TradeManagerChatHandler::_ProcessRequestTypeList, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opBidAuctionMessage,std::bind(&TradeManagerChatHandler::processBidAuctionMessage, this, std::placeholders::_1, std::placeholders::_2));
-    mMessageDispatch->RegisterMessageCallback(opBankTipDustOff,std::bind(&TradeManagerChatHandler::ProcessBankTip, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opIsVendorMessage, std::bind(&TradeManagerChatHandler::processHandleIsVendorMessage, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opAuctionQueryHeadersMessage, std::bind(&TradeManagerChatHandler::processHandleopAuctionQueryHeadersMessage, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opGetAuctionDetails, std::bind(&TradeManagerChatHandler::processGetAuctionDetails, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opCancelLiveAuctionMessage, std::bind(&TradeManagerChatHandler::processCancelLiveAuctionMessage, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opRetrieveAuctionItemMessage, std::bind(&TradeManagerChatHandler::processRetrieveAuctionItemMessage, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opProcessCreateAuction, std::bind(&TradeManagerChatHandler::ProcessCreateAuction, this, std::placeholders::_1, std::placeholders::_2));
+    //mMessageDispatch->RegisterMessageCallback(opGetCommoditiesTypeList, std::bind(&TradeManagerChatHandler::_ProcessRequestTypeList, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opBidAuctionMessage, std::bind(&TradeManagerChatHandler::processBidAuctionMessage, this, std::placeholders::_1, std::placeholders::_2));
+    mMessageDispatch->RegisterMessageCallback(opBankTipDustOff, std::bind(&TradeManagerChatHandler::ProcessBankTip, this, std::placeholders::_1, std::placeholders::_2));
 
     // load our bazaar terminals
     asyncContainer = new TradeManagerAsyncContainer(TRMQuery_LoadBazaar, 0);
@@ -135,7 +135,7 @@ TradeManagerChatHandler::TradeManagerChatHandler(Database* database, MessageDisp
     gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh_config.sp_ServerGlobalTickGet (%u);", 2);  // SQL Debug Log
 
     //load the TypeList to properly sort our items in Bazzarcategories
-    //asyncContainer = new TradeManagerAsyncContainer(TRMQuery_TypeList,0);
+    //asyncContainer = new TradeManagerAsyncContainer(TRMQuery_TypeList, 0);
     //mDatabase->ExecuteSqlAsync(this,asyncContainer,"SELECT category_mask, directory, name FROM swganh.commerce_item_types");
 
 
@@ -144,9 +144,9 @@ TradeManagerChatHandler::TradeManagerChatHandler(Database* database, MessageDisp
     //move to Handle dispatch message at some time
     uint32 ServerTimeInterval = 1;
 
-    std::tr1::shared_ptr<Timer> global_tick_timer(new Timer(CMTimer_GlobalTick,this,ServerTimeInterval*1000,NULL));
-    std::tr1::shared_ptr<Timer> tick_preserve_timer(new Timer(CMTimer_TickPreserve,this,ServerTimeInterval*10000,NULL));
-    std::tr1::shared_ptr<Timer> check_auctions_timer(new Timer(CMTimer_CheckAuctions,this,ServerTimeInterval*10000,NULL));
+    std::tr1::shared_ptr<Timer> global_tick_timer(new Timer(CMTimer_GlobalTick, this, ServerTimeInterval*1000, NULL));
+    std::tr1::shared_ptr<Timer> tick_preserve_timer(new Timer(CMTimer_TickPreserve, this, ServerTimeInterval*10000, NULL));
+    std::tr1::shared_ptr<Timer> check_auctions_timer(new Timer(CMTimer_CheckAuctions, this, ServerTimeInterval*10000, NULL));
 
     mTimers.push_back(global_tick_timer);
     mTimers.push_back(tick_preserve_timer);
@@ -332,7 +332,7 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                 TradeManagerAsyncContainer* asyncContainer = new TradeManagerAsyncContainer(TRMQuery_GetAttributeDetails, asynContainer->mClient);
                 asyncContainer->mItemDescription = mItemDescription;
 
-                mDatabase->ExecuteSqlAsync(this,asyncContainer,sql);
+                mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
                 gLogger->log(LogManager::DEBUG, "SQL :: %s", sql); // SQL Debug Log
 
                 mDatabase->DestroyDataBinding(binding);
@@ -343,20 +343,20 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
             {
                 DataBinding* binding = mDatabase->CreateDataBinding(14);
 
-                binding->addField(DFT_uint64,offsetof(ResItemDescriptionAttributes,id),8,0);
-                binding->addField(DFT_uint32,offsetof(ResItemDescriptionAttributes,amount),4,1);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,name),32,2);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,er),32,3);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,cr),32,4);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,cd),32,5);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,dr),32,6);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,fl),32,7);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,hr),32,8);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,ma),32,9);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,oq),32,10);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,sr),32,11);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,ut),32,12);
-                binding->addField(DFT_string,offsetof(ResItemDescriptionAttributes,pe),32, 13);
+                binding->addField(DFT_uint64, offsetof(ResItemDescriptionAttributes,id), 8, 0);
+                binding->addField(DFT_uint32, offsetof(ResItemDescriptionAttributes,amount), 4, 1);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,name), 32, 2);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,er), 32, 3);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,cr), 32, 4);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,cd), 32, 5);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,dr), 32, 6);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,fl), 32, 7);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,hr), 32, 8);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,ma), 32, 9);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,oq), 32, 10);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,sr), 32, 11);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,ut), 32, 12);
+                binding->addField(DFT_string, offsetof(ResItemDescriptionAttributes,pe), 32, 13);
 
 
                 uint64 count = result->getRowCount();
@@ -369,96 +369,96 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                     AttributesList::iterator it = mAtrributesList.begin();
 
                     ItemDescriptionAttributes* resItemDescription = new ItemDescriptionAttributes;
-                    strcpy(resItemDescription->name,"volume");
-                    strcpy(resItemDescription->value,"1");
+                    strcpy(resItemDescription->name, "volume");
+                    strcpy(resItemDescription->value, "1");
                     mAtrributesList.push_back(resItemDescription);
 
                     resItemDescription = new ItemDescriptionAttributes;
-                    strcpy(resItemDescription->name,"amount");
-                    sprintf(resItemDescription->value,"%"PRIu32"/100000",mItemDescription->amount);
+                    strcpy(resItemDescription->name, "amount");
+                    sprintf(resItemDescription->value, "%"PRIu32"/100000", mItemDescription->amount);
                     mAtrributesList.push_back(resItemDescription);
 
                     resItemDescription = new ItemDescriptionAttributes;
-                    strcpy(resItemDescription->name,"resource_name");
-                    sprintf(resItemDescription->value,"%s",mItemDescription->name);
+                    strcpy(resItemDescription->name, "resource_name");
+                    sprintf(resItemDescription->value, "%s", mItemDescription->name);
                     mAtrributesList.push_back(resItemDescription);
 
                     if(atoi(mItemDescription->er) !=0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
                         strcpy(resItemDescription->name,"entangle_resistance");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->er);
+                        sprintf(resItemDescription->value, "%s", mItemDescription->er);
                         mAtrributesList.push_back(resItemDescription);
                     }
                     if(atoi(mItemDescription->cr) >0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
-                        strcpy(resItemDescription->name,"res_cold_resist");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->cr);
+                        strcpy(resItemDescription->name, "res_cold_resist");
+                        sprintf(resItemDescription->value, "%s", mItemDescription->cr);
                         mAtrributesList.push_back(resItemDescription);
                     }
                     if(atoi(mItemDescription->cd) >0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
-                        strcpy(resItemDescription->name,"res_conductivity");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->cd);
+                        strcpy(resItemDescription->name, "res_conductivity");
+                        sprintf(resItemDescription->value, "%s", mItemDescription->cd);
                         mAtrributesList.push_back(resItemDescription);
                     }
                     if(atoi(mItemDescription->dr) >0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
-                        strcpy(resItemDescription->name,"res_decay_resist");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->dr);
+                        strcpy(resItemDescription->name, "res_decay_resist");
+                        sprintf(resItemDescription->value, "%s", mItemDescription->dr);
                         mAtrributesList.push_back(resItemDescription);
                     }
 
                     if(atoi(mItemDescription->fl) >0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
-                        strcpy(resItemDescription->name,"res_flavor");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->fl);
+                        strcpy(resItemDescription->name, "res_flavor");
+                        sprintf(resItemDescription->value, "%s", mItemDescription->fl);
                         mAtrributesList.push_back(resItemDescription);
                     }
                     if(atoi(mItemDescription->hr) >0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
-                        strcpy(resItemDescription->name,"res_heat_resist");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->hr);
+                        strcpy(resItemDescription->name, "res_heat_resist");
+                        sprintf(resItemDescription->value, "%s", mItemDescription->hr);
                         mAtrributesList.push_back(resItemDescription);
                     }
                     if(atoi(mItemDescription->ma) >0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
-                        strcpy(resItemDescription->name,"res_malleability");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->ma);
+                        strcpy(resItemDescription->name, "res_malleability");
+                        sprintf(resItemDescription->value, "%s", mItemDescription->ma);
                         mAtrributesList.push_back(resItemDescription);
                     }
                     if(atoi(mItemDescription->oq) >0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
-                        strcpy(resItemDescription->name,"res_quality");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->oq);
+                        strcpy(resItemDescription->name, "res_quality");
+                        sprintf(resItemDescription->value, "%s", mItemDescription->oq);
                         mAtrributesList.push_back(resItemDescription);
                     }
                     if(atoi(mItemDescription->sr) >0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
-                        strcpy(resItemDescription->name,"res_shock_resistance");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->sr);
+                        strcpy(resItemDescription->name, "res_shock_resistance");
+                        sprintf(resItemDescription->value, "%s", mItemDescription->sr);
                         mAtrributesList.push_back(resItemDescription);
                     }
                     if(atoi(mItemDescription->ut) >0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
-                        strcpy(resItemDescription->name,"res_toughness");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->ut);
+                        strcpy(resItemDescription->name, "res_toughness");
+                        sprintf(resItemDescription->value, "%s", mItemDescription->ut);
                         mAtrributesList.push_back(resItemDescription);
                     }
                     if(atoi(mItemDescription->pe) >0)
                     {
                         resItemDescription = new ItemDescriptionAttributes;
-                        strcpy(resItemDescription->name,"res_potential_energy");
-                        sprintf(resItemDescription->value,"%s",mItemDescription->pe);
+                        strcpy(resItemDescription->name, "res_potential_energy");
+                        sprintf(resItemDescription->value, "%s", mItemDescription->pe);
                         mAtrributesList.push_back(resItemDescription);
                     }
 
@@ -488,8 +488,8 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                 //now that we have the auctions main data we need to query for all the atrributes and their values
                 DataBinding* binding = mDatabase->CreateDataBinding(2);
 
-                binding->addField(DFT_string,offsetof(ItemDescriptionAttributes,name),32,0);
-                binding->addField(DFT_string,offsetof(ItemDescriptionAttributes,value),32,1);
+                binding->addField(DFT_string, offsetof(ItemDescriptionAttributes, name), 32, 0);
+                binding->addField(DFT_string, offsetof(ItemDescriptionAttributes, value), 32, 1);
 
                 AttributesList::iterator it = mAtrributesList.begin();
 
@@ -498,7 +498,7 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                 for(uint16 i=0;i <count;i++)
                 {
                     ItemDescriptionAttributes* mItemDescription = new ItemDescriptionAttributes;
-                    result->GetNextRow(binding,mItemDescription);
+                    result->GetNextRow(binding, mItemDescription);
                     mAtrributesList.push_back(mItemDescription);
                 }
 
@@ -531,7 +531,7 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                 if (count >= 1)	{
                     //the Query actually only yields a result when we are dealing with an auction
                     for(uint16 i=0;i <count;i++){
-                        result->GetNextRow(binding,&Item);
+                        result->GetNextRow(binding, &Item);
                         gChatMessageLib->sendBidderCancelAuctionMail(asynContainer->mClient, player->getCharId(), Item.BidderID, Item.Name);
 
                         //TODO
@@ -610,24 +610,24 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
             //auctions they have
 
             DataBinding* binding = mDatabase->CreateDataBinding(18);
-            binding->addField(DFT_uint64,offsetof(AuctionItem,ItemID),8,0);
-            binding->addField(DFT_uint64,offsetof(AuctionItem,OwnerID),8,1);
-            binding->addField(DFT_uint64,offsetof(AuctionItem,BazaarID),8,2);
-            binding->addField(DFT_uint32,offsetof(AuctionItem,AuctionTyp),4,3);
-            binding->addField(DFT_uint64,offsetof(AuctionItem,EndTime),8,4);
-            binding->addField(DFT_uint32,offsetof(AuctionItem,Premium),4,5);
-            binding->addField(DFT_uint32,offsetof(AuctionItem,Category),4,6);
-            binding->addField(DFT_uint32,offsetof(AuctionItem,ItemTyp),4,7);
-            binding->addField(DFT_uint32,offsetof(AuctionItem,Price),4,8);
-            binding->addField(DFT_string,offsetof(AuctionItem,Name),128,9);
-            binding->addField(DFT_string,offsetof(AuctionItem,Description), 1024, 10);
-            binding->addField(DFT_uint16,offsetof(AuctionItem,RegionID), 2, 11);
-            binding->addField(DFT_string,offsetof(AuctionItem,bidder_name), 32, 12);
-            binding->addField(DFT_uint16,offsetof(AuctionItem,PlanetID), 2, 13);
-            binding->addField(DFT_string,offsetof(AuctionItem,SellerName), 32 ,14);
-            binding->addField(DFT_string,offsetof(AuctionItem,BazaarName), 128, 15);
-            binding->addField(DFT_string,offsetof(AuctionItem,HighProxyRaw), 8, 16);
-            binding->addField(DFT_string,offsetof(AuctionItem,HighBidRaw) ,8, 17);
+            binding->addField(DFT_uint64, offsetof(AuctionItem, ItemID), 8, 0);
+            binding->addField(DFT_uint64, offsetof(AuctionItem, OwnerID), 8, 1);
+            binding->addField(DFT_uint64, offsetof(AuctionItem, BazaarID), 8, 2);
+            binding->addField(DFT_uint32, offsetof(AuctionItem, AuctionTyp), 4, 3);
+            binding->addField(DFT_uint64, offsetof(AuctionItem, EndTime), 8, 4);
+            binding->addField(DFT_uint32, offsetof(AuctionItem, Premium), 4, 5);
+            binding->addField(DFT_uint32, offsetof(AuctionItem, Category), 4, 6);
+            binding->addField(DFT_uint32, offsetof(AuctionItem, ItemTyp), 4, 7);
+            binding->addField(DFT_uint32, offsetof(AuctionItem, Price), 4, 8);
+            binding->addField(DFT_string, offsetof(AuctionItem, Name), 128, 9);
+            binding->addField(DFT_string, offsetof(AuctionItem, Description), 1024, 10);
+            binding->addField(DFT_uint16, offsetof(AuctionItem, RegionID), 2, 11);
+            binding->addField(DFT_string, offsetof(AuctionItem, bidder_name), 32, 12);
+            binding->addField(DFT_uint16, offsetof(AuctionItem, PlanetID), 2, 13);
+            binding->addField(DFT_string, offsetof(AuctionItem, SellerName), 32 ,14);
+            binding->addField(DFT_string, offsetof(AuctionItem, BazaarName), 128, 15);
+            binding->addField(DFT_string, offsetof(AuctionItem, HighProxyRaw), 8, 16);
+            binding->addField(DFT_string, offsetof(AuctionItem, HighBidRaw) ,8, 17);
 
             uint64 count = result->getRowCount();
 
@@ -645,7 +645,7 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
             for(uint64 i = 0;i < count;i++)
             {
                 //assemble our string list
-                result->GetNextRow(binding,&AuctionTemp);
+                result->GetNextRow(binding, &AuctionTemp);
                 AuctionTemp.HighBid = atoi(AuctionTemp.HighBidRaw);
                 AuctionTemp.HighProxy = atoi(AuctionTemp.HighProxyRaw);
                 auction->AddAuction(AuctionTemp);
@@ -782,9 +782,9 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
             {
 
                 DataBinding* binding = mDatabase->CreateDataBinding(3);
-                binding->addField(DFT_uint32,offsetof(AuctionItem,HighProxy),4,0);
-                binding->addField(DFT_uint32,offsetof(AuctionItem,HighBid),4,1);
-                binding->addField(DFT_uint64,offsetof(AuctionItem,BidderID),8,2);
+                binding->addField(DFT_uint32, offsetof(AuctionItem, HighProxy), 4, 0);
+                binding->addField(DFT_uint32, offsetof(AuctionItem, HighBid), 4, 1);
+                binding->addField(DFT_uint64, offsetof(AuctionItem, BidderID), 8, 2);
 
                 AuctionItem AuctionTemp;
 
@@ -794,7 +794,7 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                 asynContainer->AuctionTemp->BidderID = 0;
                 if(count == 1){
                     //there is a highbidder ... - we have the highbid and proxy
-                    result->GetNextRow(binding,&AuctionTemp);
+                    result->GetNextRow(binding, &AuctionTemp);
                     //proxy bid and id of current high bidder
                     asynContainer->AuctionTemp->HighBid = AuctionTemp.HighBid;
                     asynContainer->AuctionTemp->HighProxy = AuctionTemp.HighProxy;
@@ -815,15 +815,15 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                 //refund money where necessary
 
                  DataBinding* binding = mDatabase->CreateDataBinding(9);
-                binding->addField(DFT_uint64,offsetof(AuctionItem,ItemID),8,0);
-                binding->addField(DFT_uint64,offsetof(AuctionItem,OwnerID),8,1);
-                binding->addField(DFT_uint32,offsetof(AuctionItem,AuctionTyp),4,2);
-                binding->addField(DFT_uint32,offsetof(AuctionItem,Price),4,3);
-                binding->addField(DFT_string,offsetof(AuctionItem,Name),128,4);
-                binding->addField(DFT_string,offsetof(AuctionItem,bidder_name),32,5);
-                binding->addField(DFT_uint64,offsetof(AuctionItem,BazaarID),8,6);
-                binding->addField(DFT_string,offsetof(AuctionItem,Owner),32,7);
-                binding->addField(DFT_raw,offsetof(AuctionItem,BidderIDRaw),32,8);
+                binding->addField(DFT_uint64, offsetof(AuctionItem, ItemID), 8, 0);
+                binding->addField(DFT_uint64, offsetof(AuctionItem, OwnerID), 8, 1);
+                binding->addField(DFT_uint32, offsetof(AuctionItem, AuctionTyp), 4, 2);
+                binding->addField(DFT_uint32, offsetof(AuctionItem, Price), 4, 3);
+                binding->addField(DFT_string, offsetof(AuctionItem, Name), 128, 4);
+                binding->addField(DFT_string, offsetof(AuctionItem, bidder_name), 32, 5);
+                binding->addField(DFT_uint64, offsetof(AuctionItem, BazaarID), 8, 6);
+                binding->addField(DFT_string, offsetof(AuctionItem, Owner), 32, 7);
+                binding->addField(DFT_raw, offsetof(AuctionItem, BidderIDRaw), 32, 8);
 
 
                 AuctionItem* auctionTemp;
@@ -837,7 +837,7 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                     strcpy(auctionTemp->BidderIDRaw,"");
                     auctionTemp->BidderID=0;
 
-                    result->GetNextRow(binding,auctionTemp);
+                    result->GetNextRow(binding, auctionTemp);
 
                     using boost::lexical_cast;
                     using boost::bad_lexical_cast;
@@ -898,8 +898,8 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                 TradeManagerAsyncContainer* asyncContainer = new TradeManagerAsyncContainer(TRMQuery_NULL,NULL);
 
                 /*sprintf(sql,"CALL sp_CommerceFindExpiredListing()");*/
-                mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL sp_CommerceFindExpiredListing();");
-                gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_CommerceFindExpiredListing();"); // SQL Debug Log
+				mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL swganh.sp_CommerceFindExpiredListing();");
+				gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh.sp_CommerceFindExpiredListing();"); // SQL Debug Log
 
                 }
             break;
@@ -907,8 +907,8 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
             case TRMQuery_ProcessAuctionRefund:
             {
                 DataBinding* binding = mDatabase->CreateDataBinding(2);
-                binding->addField(DFT_uint32,offsetof(AuctionItem,MyProxy),4,0);
-                binding->addField(DFT_uint64,offsetof(AuctionItem,BidderID),8,1);
+                binding->addField(DFT_uint32, offsetof(AuctionItem, MyProxy), 4, 0);
+                binding->addField(DFT_uint64, offsetof(AuctionItem, BidderID), 8, 1);
 
                 AuctionItem* AuctionTemp;
                 uint64 count = result->getRowCount();
@@ -920,7 +920,7 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                 for(uint64 i = 0;i < count;i++)
                 {
                     AuctionTemp = new(AuctionItem);
-                    result->GetNextRow(binding,AuctionTemp);
+                    result->GetNextRow(binding, AuctionTemp);
                     // printf("\not not the winner - so refund\n");
                     // let zone handle the refund problem for logged ins in the Object
                     // sometime in the future
@@ -929,9 +929,9 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                     if(AuctionTemp->BidderID != asynContainer->AuctionTemp->OwnerID){
                         TradeManagerAsyncContainer* asyncContainer;
 
-                        sprintf(sql,"UPDATE banks SET credits=credits+%"PRId32" WHERE id=%"PRIu64"",asynContainer->MyProxy, AuctionTemp->BidderID+4);
-                        asyncContainer = new TradeManagerAsyncContainer(TRMQuery_NULL,NULL);
-                        mDatabase->ExecuteSqlAsync(this,asyncContainer,sql);
+                        sprintf(sql,"UPDATE swganh.banks SET credits=credits+%"PRId32" WHERE id=%"PRIu64"", asynContainer->MyProxy, AuctionTemp->BidderID+4);
+                        asyncContainer = new TradeManagerAsyncContainer(TRMQuery_NULL, NULL);
+                        mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
                         gLogger->log(LogManager::DEBUG, "SQL :: %s", sql); // SQL Debug Log
                     }
                     SAFE_DELETE(AuctionTemp);
@@ -941,9 +941,9 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                 //now delete the Auctions Bidhistory
                 TradeManagerAsyncContainer* asyncContainer;
 
-                sprintf(sql,"DELETE FROM commerce_bidhistory WHERE auction_id = '%"PRIu64"' ",asynContainer->AuctionTemp->ItemID);
-                asyncContainer = new TradeManagerAsyncContainer(TRMQuery_NULL,NULL);
-                mDatabase->ExecuteSqlAsync(this,asyncContainer,sql);
+                sprintf(sql,"DELETE FROM swganh.commerce_bidhistory WHERE auction_id = '%"PRIu64"' ", asynContainer->AuctionTemp->ItemID);
+                asyncContainer = new TradeManagerAsyncContainer(TRMQuery_NULL, NULL);
+                mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
                 gLogger->log(LogManager::DEBUG, "SQL :: %s", sql); // SQL Debug Log
 
                 SAFE_DELETE(asyncContainer->AuctionTemp);
@@ -953,20 +953,20 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
             case TRMQuery_BidAuction:
             {
                 DataBinding* binding = mDatabase->CreateDataBinding(10);
-                binding->addField(DFT_uint64,offsetof(AuctionItem,ItemID),8,0);
-                binding->addField(DFT_uint64,offsetof(AuctionItem,OwnerID),8,1);
-                binding->addField(DFT_uint32,offsetof(AuctionItem,AuctionTyp),4,2);
-                binding->addField(DFT_uint32,offsetof(AuctionItem,Category),4,3);
-                binding->addField(DFT_uint32,offsetof(AuctionItem,Price),4,4);
-                binding->addField(DFT_uint32,offsetof(AuctionItem,ItemTyp),4,5);
-                binding->addField(DFT_string,offsetof(AuctionItem,Name),128,6);
-                binding->addField(DFT_uint64,offsetof(AuctionItem,BazaarID),8,7);
-                binding->addField(DFT_string,offsetof(AuctionItem,bidder_name),32,8);
-                binding->addField(DFT_string,offsetof(AuctionItem,Owner),32,9);
+                binding->addField(DFT_uint64, offsetof(AuctionItem, ItemID), 8, 0);
+                binding->addField(DFT_uint64, offsetof(AuctionItem, OwnerID), 8, 1);
+                binding->addField(DFT_uint32, offsetof(AuctionItem, AuctionTyp), 4, 2);
+                binding->addField(DFT_uint32, offsetof(AuctionItem, Category), 4, 3);
+                binding->addField(DFT_uint32, offsetof(AuctionItem, Price), 4, 4);
+                binding->addField(DFT_uint32, offsetof(AuctionItem, ItemTyp), 4, 5);
+                binding->addField(DFT_string, offsetof(AuctionItem, Name), 128, 6);
+                binding->addField(DFT_uint64, offsetof(AuctionItem, BazaarID), 8, 7);
+                binding->addField(DFT_string, offsetof(AuctionItem, bidder_name), 32, 8);
+                binding->addField(DFT_string, offsetof(AuctionItem, Owner), 32, 9);
 
 
                 AuctionItem* AuctionTemp = new(AuctionItem);
-                result->GetNextRow(binding,AuctionTemp);
+                result->GetNextRow(binding, AuctionTemp);
 
                 mDatabase->DestroyDataBinding(binding);
 
@@ -982,21 +982,21 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                     //_processAuctionBid(AuctionTemp,asynContainer,player);
                     TradeManagerAsyncContainer* asyncContainer;
 
-                    gLogger->log(LogManager::DEBUG,"TMR query bidauction");
+                    gLogger->log(LogManager::DEBUG, "TMR query bidauction");
                     int8 name[40],*sqlPointer;
                     sqlPointer = name;
-                    sqlPointer += mDatabase->Escape_String(name,AuctionTemp->bidder_name,strlen(AuctionTemp->bidder_name));
+                    sqlPointer += mDatabase->Escape_String(name, AuctionTemp->bidder_name, strlen(AuctionTemp->bidder_name));
                     *sqlPointer++ = '\0';
 
                     int8 sql[390];
-                    sprintf(sql,"SELECT cbh.proxy_bid, cbh.max_bid, c.id FROM swganh.characters AS c INNER JOIN swganh.commerce_bidhistory AS cbh ON c.firstname = '%s' WHERE cbh.auction_id = %"PRIu64" AND cbh.bidder_name = '",name,AuctionTemp->ItemID);
+                    sprintf(sql,"SELECT proxy_bid, max_bid, id FROM swganh.characters INNER JOIN swganh.commerce_bidhistory firstname = '%s' WHERE auction_id = %"PRIu64" AND bidder_name = '", name, AuctionTemp->ItemID);
 
                     sqlPointer = sql + strlen(sql);
-                    sqlPointer += mDatabase->Escape_String(sqlPointer,AuctionTemp->bidder_name, strlen(AuctionTemp->bidder_name));
+                    sqlPointer += mDatabase->Escape_String(sqlPointer, AuctionTemp->bidder_name, strlen(AuctionTemp->bidder_name));
                     *sqlPointer++ = '\'';
                     *sqlPointer++ = '\0';
 
-                    asyncContainer = new TradeManagerAsyncContainer(TRMQuery_ProcessBidAuction,asynContainer->mClient);
+                    asyncContainer = new TradeManagerAsyncContainer(TRMQuery_ProcessBidAuction, asynContainer->mClient);
                     asyncContainer->MyBid = asynContainer->MyBid;
                     asyncContainer->MyProxy = asynContainer->MyProxy;
                     asyncContainer->AuctionID = asynContainer->AuctionID;
@@ -1004,7 +1004,7 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
                     asyncContainer->BuyerID = player->getCharId();
                     asyncContainer->BazaarID = 0;//
                     asyncContainer->AuctionTemp = AuctionTemp;
-                    mDatabase->ExecuteSqlAsync(this,asyncContainer,sql);
+                    mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
                     gLogger->log(LogManager::DEBUG, "SQL :: %s", sql); // SQL Debug Log
                     break;
                 }
@@ -1037,8 +1037,8 @@ void TradeManagerChatHandler::handleDatabaseJobComplete(void* ref,DatabaseResult
         case TRMQuery_LoadGlobalTick:
         {
             DataBinding* binding = mDatabase->CreateDataBinding(1);
-            binding->addField(DFT_uint64,offsetof(TradeManagerChatHandler,mGlobalTickCount),8,0);
-            result->GetNextRow(binding,this);
+            binding->addField(DFT_uint64, offsetof(TradeManagerChatHandler, mGlobalTickCount), 8, 0);
+            result->GetNextRow(binding, this);
             mDatabase->DestroyDataBinding(binding);
         }
         break;
@@ -1086,10 +1086,10 @@ void TradeManagerChatHandler::processAuctionEMails(AuctionItem* auctionTemp)
     if(auctionTemp->AuctionTyp == TRMVendor_Instant)
     {
         //any instant getting here has not been purchased
-        gLogger->log(LogManager::DEBUG,"trade manager vendor instant");
+        gLogger->log(LogManager::DEBUG, "trade manager vendor instant");
         atMacroString* aMS = new atMacroString();
 
-        aMS->addMBstf("auction","seller_fail");
+        aMS->addMBstf("auction", "seller_fail");
         aMS->addTO(BString(auctionTemp->Name));
         aMS->addTextModule();
 
@@ -1103,14 +1103,14 @@ void TradeManagerChatHandler::processAuctionEMails(AuctionItem* auctionTemp)
         //attachment is already initialized with an empty string
         //mail->setAttachments(attachment);
 
-        gChatManager->sendSystemMailMessage(mail,auctionTemp->OwnerID);
-        gLogger->log(LogManager::DEBUG,"trade manager vendor instant ended");
+        gChatManager->sendSystemMailMessage(mail, auctionTemp->OwnerID);
+        gLogger->log(LogManager::DEBUG, "trade manager vendor instant ended");
 
     }
 
     if(auctionTemp->AuctionTyp == TRMVendor_Auction)
     {
-        gLogger->log(LogManager::DEBUG,"trm vendor auction");
+        gLogger->log(LogManager::DEBUG, "trm vendor auction");
         //has it been sold??
         if(auctionTemp->BidderID == 0)
         {
@@ -1118,7 +1118,7 @@ void TradeManagerChatHandler::processAuctionEMails(AuctionItem* auctionTemp)
 
             atMacroString* aMS = new atMacroString();
 
-            aMS->addMBstf("auction","seller_fail");
+            aMS->addMBstf("auction", "seller_fail");
             aMS->addTO(BString(auctionTemp->Name));
             aMS->addTextModule();
 
@@ -1130,7 +1130,7 @@ void TradeManagerChatHandler::processAuctionEMails(AuctionItem* auctionTemp)
             mail->setTime(static_cast<uint32>(time(NULL)));
             mail->setAttachments(aMS->assemble());
 
-            gChatManager->sendSystemMailMessage(mail,auctionTemp->OwnerID);
+            gChatManager->sendSystemMailMessage(mail, auctionTemp->OwnerID);
 
         }
         else
@@ -1138,12 +1138,12 @@ void TradeManagerChatHandler::processAuctionEMails(AuctionItem* auctionTemp)
             //EMail to the seller
             atMacroString* aMS = new atMacroString();
 
-            aMS->addMBstf("auction","seller_success");
+            aMS->addMBstf("auction", "seller_success");
             aMS->addTO(BString(auctionTemp->Name));
             aMS->addTT(BString(auctionTemp->bidder_name));
             aMS->addDI(auctionTemp->Price);
             aMS->addTextModule();
-            aMS->addMBstf("auction","seller_success_location");
+            aMS->addMBstf("auction", "seller_success_location");
             aMS->addTT(region);
             aMS->addTO(planet);
             aMS->addTextModule();
@@ -1156,24 +1156,24 @@ void TradeManagerChatHandler::processAuctionEMails(AuctionItem* auctionTemp)
             mail->setTime(static_cast<uint32>(time(NULL)));
             mail->setAttachments(aMS->assemble());
 
-            gChatManager->sendSystemMailMessage(mail,auctionTemp->OwnerID);
+            gChatManager->sendSystemMailMessage(mail, auctionTemp->OwnerID);
 
             //EMail to the buyer
             aMS = new atMacroString();
 
-            aMS->addMBstf("auction","buyer_success");
+            aMS->addMBstf("auction", "buyer_success");
             aMS->addTO(BString(auctionTemp->Name));
             aMS->addTT(BString(auctionTemp->Owner));
             aMS->addDI(auctionTemp->Price);
             aMS->addTextModule();
 
-            aMS->addMBstf("auction","buyer_success_location");
+            aMS->addMBstf("auction", "buyer_success_location");
             aMS->addTT(region);
             aMS->addTO(planet);
             aMS->addTextModule();
 
             aMS->setPlanetString(planet);
-            aMS->setWP(x,y,0,auctionTemp->Name);
+            aMS->setWP(x, y, 0, auctionTemp->Name);
             aMS->addWaypoint();
 
             mail= new Mail();
@@ -1184,17 +1184,17 @@ void TradeManagerChatHandler::processAuctionEMails(AuctionItem* auctionTemp)
             mail->setTime(static_cast<uint32>(time(NULL)));
             mail->setAttachments(aMS->assemble());
 
-            gChatManager->sendSystemMailMessage(mail,auctionTemp->BidderID);
+            gChatManager->sendSystemMailMessage(mail, auctionTemp->BidderID);
         }
     }
 
     if(auctionTemp->AuctionTyp == TRMVendor_Ended)
     {
-        gLogger->log(LogManager::DEBUG,"trm vendor auction ended");
+        gLogger->log(LogManager::DEBUG, "trm vendor auction ended");
         //auction is ended and stored longer than the time limit so it gets deleted
         atMacroString* aMS = new atMacroString();
 
-        aMS->addMBstf("auction","item_expired");
+        aMS->addMBstf("auction", "item_expired");
         aMS->addTO(BString(auctionTemp->Name));
         aMS->addTextModule();
 
@@ -1206,17 +1206,17 @@ void TradeManagerChatHandler::processAuctionEMails(AuctionItem* auctionTemp)
         mail->setTime(static_cast<uint32>(time(NULL)));
         mail->setAttachments(aMS->assemble());
 
-        gChatManager->sendSystemMailMessage(mail,auctionTemp->BidderID);
+        gChatManager->sendSystemMailMessage(mail, auctionTemp->BidderID);
     }
 }
 
 void TradeManagerChatHandler::processAuctionBid(TradeManagerAsyncContainer* asynContainer, Player* player)
 {
 //auction ...
-    int8 sql[250], PlayerName[40],*sqlPointer;
+    int8 sql[250], PlayerName[40], *sqlPointer;
 
     sqlPointer = PlayerName;
-    sqlPointer += mDatabase->Escape_String(sqlPointer,player->getName().getAnsi(),player->getName().getLength());
+    sqlPointer += mDatabase->Escape_String(sqlPointer, player->getName().getAnsi(), player->getName().getLength());
     *sqlPointer++ = '\0';
 
     //Check the current add depending on the price
@@ -1249,13 +1249,13 @@ void TradeManagerChatHandler::processAuctionBid(TradeManagerAsyncContainer* asyn
             //just update the high proxy
             //strcpy(Name,player->getName().getAnsi());
             //sprintf(sql,"UPDATE commerce_bidhistory SET proxy_bid = '%u'WHERE auction_id = '%I64u' AND bidder_name = %s",asynContainer->MyProxy  ,asynContainer->AuctionTemp->ItemID ,Name);
-            sprintf(sql,"UPDATE commerce_bidhistory SET proxy_bid = '%"PRIu32"'WHERE auction_id = '%"PRIu64"' AND bidder_name = '%s'", asynContainer->MyProxy, asynContainer->AuctionTemp->ItemID, PlayerName);
+            sprintf(sql,"UPDATE swganh.commerce_bidhistory SET proxy_bid = '%"PRIu32"'WHERE auction_id = '%"PRIu64"' AND bidder_name = '%s'", asynContainer->MyProxy, asynContainer->AuctionTemp->ItemID, PlayerName);
 
             TradeManagerAsyncContainer* asyncContainer;
-            asyncContainer = new TradeManagerAsyncContainer(TRMQuery_ACKRetrieval,asynContainer->mClient);
+            asyncContainer = new TradeManagerAsyncContainer(TRMQuery_ACKRetrieval, asynContainer->mClient);
 
             asyncContainer->AuctionID = asynContainer->AuctionTemp->ItemID;
-            mDatabase->ExecuteSqlAsync(this,asyncContainer,sql);
+            mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
             gLogger->log(LogManager::DEBUG, "SQL :: %s", sql); // SQL Debug Log
 
             return;
@@ -1264,7 +1264,7 @@ void TradeManagerChatHandler::processAuctionBid(TradeManagerAsyncContainer* asyn
         {
             // we are bidding on our own auction but our proxy is the same
             //dont bid ourselfes unnecessarily up
-            gChatMessageLib->sendBidAuctionResponse(asynContainer->mClient,0,asynContainer->AuctionID);
+            gChatMessageLib->sendBidAuctionResponse(asynContainer->mClient, 0, asynContainer->AuctionID);
             return;
         }
     }
@@ -1311,7 +1311,7 @@ void TradeManagerChatHandler::processAuctionBid(TradeManagerAsyncContainer* asyn
         // what do we do if this is our first bid and we are NOT the high bidder?
         // sf_BidAuction only updates the bid of the high bidder
 
-        sprintf(sql,"SELECT sf_BidUpdate ('%"PRIu64"','%"PRIu32"','%"PRIu32"','%s')", asynContainer->AuctionTemp->ItemID, asynContainer->MyBid, asynContainer->MyProxy, PlayerName);
+        sprintf(sql,"SELECT swganh.sf_BidUpdate ('%"PRIu64"','%"PRIu32"','%"PRIu32"','%s')", asynContainer->AuctionTemp->ItemID, asynContainer->MyBid, asynContainer->MyProxy, PlayerName);
         TradeManagerAsyncContainer* asyncContainer;
         asyncContainer = new TradeManagerAsyncContainer(TRMQuery_ACKRetrieval, asynContainer->mClient);
         mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
@@ -1319,12 +1319,12 @@ void TradeManagerChatHandler::processAuctionBid(TradeManagerAsyncContainer* asyn
 
     }
 
-    sprintf(sql,"SELECT sf_BidAuction ('%"PRIu64"','%"PRIu32"','%"PRIu32"','%s')", asynContainer->AuctionTemp->ItemID, TheBid, TheProxy, PlayerName);
+    sprintf(sql,"SELECT swganh.sf_BidAuction ('%"PRIu64"','%"PRIu32"','%"PRIu32"','%s')", asynContainer->AuctionTemp->ItemID, TheBid, TheProxy, PlayerName);
     TradeManagerAsyncContainer* asyncContainer;
-    asyncContainer = new TradeManagerAsyncContainer(TRMQuery_ACKRetrieval,asynContainer->mClient);
+    asyncContainer = new TradeManagerAsyncContainer(TRMQuery_ACKRetrieval, asynContainer->mClient);
 
     asyncContainer->AuctionID = asynContainer->AuctionTemp->ItemID;
-    mDatabase->ExecuteSqlAsync(this,asyncContainer,sql);
+    mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
     gLogger->log(LogManager::DEBUG, "SQL :: %s", sql); // SQL Debug Log
 }
 
@@ -1339,7 +1339,7 @@ void TradeManagerChatHandler::ProcessCreateAuction(Message* message,DispatchClie
         player = (*accIt).second;
     else
     {
-        gLogger->log(LogManager::EMERGENCY,"Error getting player from account map %u",client->getAccountId());
+        gLogger->log(LogManager::EMERGENCY, "Error getting player from account map %u", client->getAccountId());
         return;
     }
 
@@ -1356,22 +1356,22 @@ void TradeManagerChatHandler::ProcessCreateAuction(Message* message,DispatchClie
     int8 Query[4096];		//depending on our Auction comments this can become long
     if (category != 0)
     {
-        sprintf(Query," UPDATE commerce_auction SET start = '%"PRIu64"', region_id = '%"PRIu32"', planet_id = '%"PRIu32"',category = '%"PRIu32"' WHERE auction_id = '%"PRIu64"'", time, RegionID, player->getPlanetId(),category,ItemID);
+        sprintf(Query," UPDATE swganh.commerce_auction SET start = '%"PRIu64"', region_id = '%"PRIu32"', planet_id = '%"PRIu32"', category = '%"PRIu32"' WHERE auction_id = '%"PRIu64"';", time, RegionID, player->getPlanetId(),category,ItemID);
     }
     else
     {
-        sprintf(Query," UPDATE commerce_auction ca inner join swganh.items i ON (i.id = ca.auction_id) inner join swganh.item_types it ON (it.id = i.item_type) SET ca.start = '%"PRIu64"' , ca.region_id = '%"PRIu32"', ca.planet_id = '%"PRIu32"', ca.category = it.bazaar_category  WHERE ca.auction_id = '%"PRIu64"'", time, RegionID, player->getPlanetId(),ItemID);
+        sprintf(Query," UPDATE swganh.commerce_auction INNER JOIN swganh.items ON (id = auction_id) INNER JOIN swganh.item_types ON (id = item_type) SET start = '%"PRIu64"' , region_id = '%"PRIu32"', planet_id = '%"PRIu32"', ca.category = bazaar_category  WHERE auction_id = '%"PRIu64"';", time, RegionID, player->getPlanetId(), ItemID);
     }
 
 
-    TradeManagerAsyncContainer* asyncContainer = new TradeManagerAsyncContainer(TRMQuery_CreateAuction,client);
+    TradeManagerAsyncContainer* asyncContainer = new TradeManagerAsyncContainer(TRMQuery_CreateAuction, client);
     asyncContainer->AuctionID = ItemID;
-    mDatabase->ExecuteSqlAsync(this,asyncContainer,Query);
+    mDatabase->ExecuteSqlAsync(this, asyncContainer, Query);
     gLogger->log(LogManager::DEBUG, "SQL :: '%s'", Query); // SQL Debug Log
 }
 
 //=======================================================================================================================
-void TradeManagerChatHandler::processRetrieveAuctionItemMessage(Message* message,DispatchClient* client)
+void TradeManagerChatHandler::processRetrieveAuctionItemMessage(Message* message, DispatchClient* client)
 {
     TradeManagerAsyncContainer* asyncContainer;
     Player* player;
@@ -1381,7 +1381,7 @@ void TradeManagerChatHandler::processRetrieveAuctionItemMessage(Message* message
         player = (*accIt).second;
     else
     {
-        gLogger->log(LogManager::EMERGENCY,"Error getting player from account map %u",client->getAccountId());
+        gLogger->log(LogManager::EMERGENCY, "Error getting player from account map %u",client->getAccountId());
         return;
     }
 
@@ -1392,7 +1392,7 @@ void TradeManagerChatHandler::processRetrieveAuctionItemMessage(Message* message
     uint64	TerminalID	= message->getUint64();
 
     int8 sql[200];
-    sprintf(sql,"SELECT auction_id, bazaar_id, itemtype FROM swganh.commerce_auction c  WHERE c.auction_id = %"PRIu64"", ItemID);
+    sprintf(sql, "SELECT auction_id, bazaar_id, itemtype FROM swganh.commerce_auction WHERE auction_id = %"PRIu64"", ItemID);
     asyncContainer = new TradeManagerAsyncContainer(TRMQuery_RetrieveAuction, client);
     asyncContainer->BazaarID = TerminalID;
     mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
@@ -1411,7 +1411,7 @@ void TradeManagerChatHandler::processBidAuctionMessage(Message* message,Dispatch
         player = (*accIt).second;
     else
     {
-        gLogger->log(LogManager::EMERGENCY,"processBidAuctionMessage :: Error getting the player from account map %u",client->getAccountId());
+        gLogger->log(LogManager::EMERGENCY, "processBidAuctionMessage :: Error getting the player from account map %u", client->getAccountId());
         return;
     }
 
@@ -1426,9 +1426,9 @@ void TradeManagerChatHandler::processBidAuctionMessage(Message* message,Dispatch
     int8 sql[490];
     //auction_bidhistory fields will be NULL when we have no bids
 
-    sprintf(sql,"SELECT ca.auction_id, ca.owner_id, ca.type, ca.category, ca.price, ca.itemtype, ca.name, ca.bazaar_id, ca.bidder_name, c.firstname FROM swganh.characters AS c INNER JOIN swganh.commerce_auction AS ca ON (ca.owner_id = c.id) where ca.auction_id = %"PRIu64"",ItemID);
+    sprintf(sql,"SELECT auction_id, owner_id, type, category, price, itemtype, name, bazaar_id, bidder_name, firstname FROM swganh.characters INNER JOIN swganh.commerce_auction ON (owner_id = id) where auction_id = %"PRIu64"", ItemID);
 
-    asyncContainer = new TradeManagerAsyncContainer(TRMQuery_BidAuction,client);
+    asyncContainer = new TradeManagerAsyncContainer(TRMQuery_BidAuction, client);
     asyncContainer->MyBid = MyBid;
     asyncContainer->MyProxy = MyProxy;
     asyncContainer->AuctionID = ItemID;
@@ -1442,14 +1442,14 @@ void TradeManagerChatHandler::processBidAuctionMessage(Message* message,Dispatch
     else
         asyncContainer->BazaarID = 0;//
 
-    mDatabase->ExecuteSqlAsync(this,asyncContainer,sql);
+    mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
     gLogger->log(LogManager::DEBUG, "SQL :: %s", sql); // SQL Debug Log
     // client checks if we have enough money
     // cheaters (bot modified client )will be flagged in the zoneserver
 }
 
 //=======================================================================================================================
-void TradeManagerChatHandler::processCancelLiveAuctionMessage(Message* message,DispatchClient* client)
+void TradeManagerChatHandler::processCancelLiveAuctionMessage(Message* message, DispatchClient* client)
 {
     TradeManagerAsyncContainer* asyncContainer;
 
@@ -1460,7 +1460,7 @@ void TradeManagerChatHandler::processCancelLiveAuctionMessage(Message* message,D
         player = (*accIt).second;
     else
     {
-        gLogger->log(LogManager::EMERGENCY,"Error getting player from account map %u",client->getAccountId());
+        gLogger->log(LogManager::EMERGENCY, "Error getting player from account map %u", client->getAccountId());
         return;
     }
 
@@ -1470,15 +1470,15 @@ void TradeManagerChatHandler::processCancelLiveAuctionMessage(Message* message,D
     //get all the bids on the auction and refunf the affected players
     //send the EMails
     int8 sql[300];
-    sprintf(sql,"SELECT ch.id, ca.name, cbh.proxy_bid FROM swganh.commerce_auction AS ca INNER JOIN swganh.commerce_bidhistory AS cbh ON (cbh.bidder_name = ca.bidder_name)  INNER JOIN swganh.characters AS ch ON (cbh.bidder_name = ch.firstname)  WHERE ca.auction_id = %"PRIu64"",ItemID);
+    sprintf(sql,"SELECT id, name, proxy_bid FROM swganh.commerce_auction INNER JOIN swganh.commerce_bidhistory ON (bidder_name = bidder_name) INNER JOIN swganh.characters ON (bidder_name = firstname)  WHERE auction_id = %"PRIu64";", ItemID);
     asyncContainer = new TradeManagerAsyncContainer(TRMQuery_CancelAuction_BidderMail, client);
     asyncContainer->AuctionID = ItemID;
-    mDatabase->ExecuteSqlAsync(this,asyncContainer,sql);
+    mDatabase->ExecuteSqlAsync(this, asyncContainer, sql);
     gLogger->log(LogManager::DEBUG, "SQL :: %s", sql); // SQL Debug Log
 }
 
 //=======================================================================================================================
-void TradeManagerChatHandler::processGetAuctionDetails(Message* message,DispatchClient* client)
+void TradeManagerChatHandler::processGetAuctionDetails(Message* message, DispatchClient* client)
 {
     TradeManagerAsyncContainer* asyncContainer;
 
@@ -1489,7 +1489,7 @@ void TradeManagerChatHandler::processGetAuctionDetails(Message* message,Dispatch
         player = (*accIt).second;
     else
     {
-        gLogger->log(LogManager::EMERGENCY,"Error getting player from account map %u",client->getAccountId());
+        gLogger->log(LogManager::EMERGENCY, "Error getting player from account map %u", client->getAccountId());
         return;
     }
 
@@ -1499,12 +1499,12 @@ void TradeManagerChatHandler::processGetAuctionDetails(Message* message,Dispatch
     //we'll need our item description, the iff data and the rest will be done by the items object
     asyncContainer = new TradeManagerAsyncContainer(TRMQuery_GetDetails,client);
 
-    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL sp_BazaarAuctionDetailsGet(%"PRIu64");", AuctionID);
-    gLogger->log(LogManager::DEBUG, "SQL :: CALL sp_BazaarAuctionDetailsGet(%"PRIu64");", AuctionID);
+    mDatabase->ExecuteProcedureAsync(this, asyncContainer, "CALL swganh.sp_BazaarAuctionDetailsGet(%"PRIu64");", AuctionID);
+    gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh.sp_BazaarAuctionDetailsGet(%"PRIu64");", AuctionID);
 }
 
 //=======================================================================================================================
-void TradeManagerChatHandler::processHandleopAuctionQueryHeadersMessage(Message* message,DispatchClient* client)
+void TradeManagerChatHandler::processHandleopAuctionQueryHeadersMessage(Message* message, DispatchClient* client)
 {
     TradeManagerAsyncContainer* asyncContainer;
 
@@ -1929,7 +1929,7 @@ void TradeManagerChatHandler::ProcessBankTip(Message* message,DispatchClient* cl
         player = (*accIt).second;
     else
     {
-        gLogger->log(LogManager::EMERGENCY,"Error getting player from account map %u",client->getAccountId());
+        gLogger->log(LogManager::EMERGENCY, "Error getting player from account map %u", client->getAccountId());
         return;
     }
 
@@ -1941,7 +1941,7 @@ void TradeManagerChatHandler::ProcessBankTip(Message* message,DispatchClient* cl
     message->getStringAnsi(receiverName);
 
     //send the respective EMails
-    gChatMessageLib->sendBanktipMail(client, player, receiverName,recipientID, amount);
+    gChatMessageLib->sendBanktipMail(client, player, receiverName, recipientID, amount);
 
     //update the bankaccount of the recipient if online
     Player* recipient = gChatManager->getPlayerByName(receiverName);
@@ -1949,13 +1949,13 @@ void TradeManagerChatHandler::ProcessBankTip(Message* message,DispatchClient* cl
     if(recipient)
     {
         //let the zone update the players bank account db is already updated at this point
-        gChatMessageLib->sendBankTipDeductMessage(client,recipient->getCharId(),amount,recipient);
-        gChatMessageLib->sendSystemMessageProper(recipient,0,L"","base_player","prose_tip_pass_target","","","",amount,"","","",player->getCharId(),0,0,"","","");
+        gChatMessageLib->sendBankTipDeductMessage(client,recipient->getCharId(), amount,recipient);
+        gChatMessageLib->sendSystemMessageProper(recipient, 0, L"", "base_player", "prose_tip_pass_target", "", "", "", amount, "", "", "", player->getCharId(), 0, 0, "", "", "");
 
     }
     receiverName.convert(BSTRType_Unicode16);
 
-    gChatMessageLib->sendSystemMessageProper(player,0,L"","base_player","prose_tip_pass_self","","","",amount,"","",receiverName.getUnicode16(),0,0,0,"","","");
+    gChatMessageLib->sendSystemMessageProper(player, 0, L"", "base_player", "prose_tip_pass_self", "", "", "", amount, "", "", receiverName.getUnicode16(), 0, 0, 0, "", "", "");
 
     //send the respective sys messages
 

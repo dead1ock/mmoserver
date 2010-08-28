@@ -79,7 +79,7 @@ void LoginManager::Process(void)
     if (Anh_Utils::Clock::getSingleton()->getLocalTime() - mLastStatusQuery > 5000)
     {
         mLastStatusQuery = static_cast<uint32>(Anh_Utils::Clock::getSingleton()->getLocalTime());
-        mDatabase->ExecuteProcedureAsync(this, (void*)1, "CALL swganh.sp_ReturnGalaxyStatus;");
+        mDatabase->ExecuteProcedureAsync(this, (void*)1, "CALL swganh_config.sp_ReturnGalaxyStatus;");
         gLogger->log(LogManager::DEBUG, "SQL :: CALL swganh.sp_ReturnGalaxyStatus;"); // SQL Debug Log
     }
 
@@ -496,8 +496,8 @@ void LoginManager::_processDeleteCharacter(Message* message,LoginClient* client)
     uint64 characterId = message->getUint64();
 
     client->setState(LCSTATE_DeleteCharacter);
-    mDatabase->ExecuteSqlAsync(this,(void*)client,"SELECT sf_CharacterDelete(\'%"PRIu64"\')", characterId);
-    gLogger->log(LogManager::DEBUG, "SQL :: SELECT sf_CharacterDelete(\'%"PRIu64"\')", characterId); // SQL Debug Log
+    mDatabase->ExecuteSqlAsync(this,(void*)client,"SELECT swganh.sf_CharacterDelete(\'%"PRIu64"\')", characterId);
+    gLogger->log(LogManager::DEBUG, "SQL :: SELECT swganh.sf_CharacterDelete(\'%"PRIu64"\')", characterId); // SQL Debug Log
 }
 
 //======================================================================================================================
