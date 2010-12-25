@@ -17,23 +17,32 @@
  along with MMOServer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <anh/component/base_component.h>
+#ifndef LIBANH_COMPONENT_COMPONENT_TYPE
+#define LIBANH_COMPONENT_COMPONENT_TYPE
+
+#include <anh/hash_string.h>
 
 namespace anh {
 namespace component {
 
-BaseComponent::BaseComponent(ObjectId id)
+/**
+ * \brief Holds type and options information about a specific component type.
+ *
+ * Options and Variables:
+ * id - A Hashed string that specifies the type of component.
+ * update_every_frame - If flagged true, the components update function will be called every frame.
+ */
+struct ComponentType
 {
+	ComponentType(HashString _id, bool _update_every_frame = false)
+		: id(_id)
+		, update_every_frame(_update_every_frame) { }
+
+	HashString id;
+	bool update_every_frame;
+};
+
+}
 }
 
-BaseComponent::~BaseComponent()
-{
-}
-
-const ObjectId& BaseComponent::object_id(void)
-{
-	return object_id_;
-}
-
-}
-}
+#endif // LIBANH_COMPONENT_COMPONENT_TYPE

@@ -22,7 +22,7 @@
 
 #include <list>
 #include <map>
-#include <anh/component/icomponent.h>
+#include <anh/component/component_interface.h>
 #include <Utils/Singleton.h>
 
 namespace anh {
@@ -37,9 +37,6 @@ class ObjectManager;
 class ObjectManager
 {
 public:
-	typedef std::map<IComponent::ObjectId, std::list<std::shared_ptr<IComponent>>>				ObjectComponentMap;
-	typedef std::map<IComponent::ObjectId, std::list<std::shared_ptr<IComponent>>>::iterator	ObjectComponentMapIterator;
-
 	/**
 	 * \brief Default constructor.
 	 */
@@ -56,7 +53,7 @@ public:
 	 * \param id The id of the object to attach the new component to.
 	 * \param component The component to attach.
 	 */
-	void AttachComponent(const IComponent::ObjectId& id, std::shared_ptr<IComponent> component);
+	void AttachComponent(const ObjectId& id, std::shared_ptr<ComponentInterface> component);
 	
 	/**
 	 * \brief Detaches a component from an object by id.
@@ -64,7 +61,7 @@ public:
 	 * \param id The id of the object to detach the component from.
 	 * \param type The type of component we want to detach.
 	 */
-	void DetachComponent(const IComponent::ObjectId& id, const IComponent::ComponentType& type);
+	void DetachComponent(const ObjectId& id, const ComponentType& type);
 	
 	/**
 	 * \brief Fetches an component that is attached to a object.
@@ -73,7 +70,7 @@ public:
 	 * \param type The type of component we want to fetch.
 	 * \returns T The interface of the component we fetched.
 	 */
-	template<class T> T QueryInterface(const IComponent::ObjectId& id, const IComponent::ComponentType& type);
+	template<class T> std::shared_ptr<T> QueryInterface(const ObjectId& id, const ComponentType& type);
 
 	/**
 	 * \brief Looks up whether a specific component interface has been attached to an object id.
@@ -82,10 +79,15 @@ public:
 	 * \param type The type of component we are looking for.
 	 * \returns bool True if the component exists, false if the component does not exist.
 	 */
-	bool HasInterface(const IComponent::ObjectId& id, const IComponent::ComponentType& type);
+	bool HasInterface(const ObjectId& id, const ComponentType& type);
 
 	/**
-	 * \brief Sends a message to each component that is attached to a specific object.
+	 * \brief Sends a message to each component that is attached to a specific object. When a result other than
+	 * MR_IGNORE is returned by a component, the message passing loop breaks and returns the result. This means
+	 * if two components handle the same message, after the first component has handled its message and returns
+	 * a result other then MR_IGNORE, the second component will not get the passed message.
+	 *
+	 * If you want to send a message to each component without being consered about a result, see BroadcastMessage.
 	 *
 	 * \param object_id Id of the object to post the message to.
 	 * \param type The type of message to post to each component.
@@ -93,11 +95,41 @@ public:
 	 * \returns MessageResult The result of the post operation.
 	 * \see MessageResult
 	 */
-	MessageResult PostMessage(const IComponent::ObjectId& object_id, const IComponent::MessageType& type, IComponent::Message message);
+	MessageResult PostMessage(const ObjectId& object_id, const MessageType& type, const Message message);
+
+	/**
+	 * \brief Sends a message to each component that is attached to a specific object. This function will not break
+	 * from the message passing loop if a return result other than MR_IGNORE is returned by a component. This allows
+	 * you to pass messages that potentually multiple components need to handle or in which you do not care to retrieve
+	 * a result.
+	 *
+	 * If you want a success result, see PostMessage.
+	 *
+	 * \param object_id Id of the object to broadcast the message to.
+	 * \param type The type of message to post to each component.
+	 * \param message The message to pass the component.
+	 */
+	void BroadcastMessage(const ObjectId& object_id, const MessageType& type, const Message message);
+
+	/**
+	 * \brief Updates components added to the per-frame update list.
+	 *
+	 * \param timeout The number of milliseconds between the last update.
+	 */
+	void Tick(const float timeout);
+
 
 protected:
 private:
-	ObjectComponentMap	object_component_map_;
+	typedef std::map<ObjectId, std::list<std::shared_ptr<ComponentInterface>>>				ObjectComponentMap;
+	typedef std::map<ObjectId, std::list<std::shared_ptr<ComponentInterface>>>::iterator	ObjectComponentMapIterator;
+	typedef std::pair<ObjectId, std::list<std::shared_ptr<ComponentInterface>>>				ObjectComponentMapPair;
+
+	typedef std::list<std::shared_ptr<ComponentInterface>>									ComponentList;
+	typedef std::list<std::shared_ptr<ComponentInterface>>::iterator						ComponentListIterator;
+
+	ObjectComponentMap	object_components_map_;
+	ComponentList		update_components_;		// Components being updated every frame.
 
 };
 

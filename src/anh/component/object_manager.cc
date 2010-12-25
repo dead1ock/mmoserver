@@ -17,6 +17,7 @@
  along with MMOServer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <algorithm>
 #include <anh/component/object_manager.h>
 
 namespace anh {
@@ -28,20 +29,126 @@ ObjectManager::ObjectManager()
 ObjectManager::~ObjectManager()
 { }
 
-void ObjectManager::AttachComponent(const IComponent::ObjectId& id, std::shared_ptr<IComponent> component)
+void ObjectManager::AttachComponent(const ObjectId& id, std::shared_ptr<ComponentInterface> component)
 {
+    // See if the object already has attached components
+    // if not, create a new object id entry and attach the
+    // new component.
+    ObjectComponentMapIterator i = object_components_map_.find(id);
+
+    if(i == object_components_map_.end())
+	{
+		std::list<std::shared_ptr<ComponentInterface>> component_list;
+		component_list.push_back(component);
+		object_components_map_.insert(ObjectComponentMapPair(id, component_list));
+
+		if(component->component_type().update_every_frame)
+			update_components_.push_back(component);
+	}
+	else
+	{
+		// Iterate through each of the objects
+		// components to make sure we dont have
+		// a duplicate componented added.
+		//
+		// If there is a duplicate entry we will ignore
+		// the addition.
+		bool component_exists = false;
+		std::for_each((*i).second.begin(), (*i).second.end(), [=, &component_exists](std::shared_ptr<ComponentInterface> comp) {
+			if(comp->component_type().id == component->component_type().id)
+			{
+				component_exists = true;
+				return;
+			}
+		});
+
+		if(!component_exists) {
+			(*i).second.push_back(component);
+
+			if(component->component_type().update_every_frame)
+				update_components_.push_back(component);
+		}
+	}
+    
 }
 
-void ObjectManager::DetachComponent(const IComponent::ObjectId& id, const IComponent::ComponentType& type)
+void ObjectManager::DetachComponent(const ObjectId& id, const ComponentType& type)
 {
+	// Find the objects components
+	// if the object id does not exist
+	// in the map, ignore the detach.
+	ObjectComponentMapIterator i = object_components_map_.find(id);
+	if(i != object_components_map_.end())
+	{
+		// Find the specific component and remove it.
+		(*i).second.remove_if( [=](std::shared_ptr<ComponentInterface> comp) {
+			return (comp->component_type().id == type.id);
+		});
+
+		// Lookup whether this component is in the update list.
+		update_components_.remove_if( [=](std::shared_ptr<ComponentInterface> comp) {
+			return ((comp->object_id()) == id && (comp->component_type().id == type.id));
+		});
+	}
 }
 
-bool ObjectManager::HasInterface(const IComponent::ObjectId& id, const IComponent::ComponentType& type)
+bool ObjectManager::HasInterface(const ObjectId& id, const ComponentType& type)
 {
+	bool result = false;
+	// Find out objects components
+	// if no object components are found
+	// return false by default.
+	ObjectComponentMapIterator i = object_components_map_.find(id);
+    if(i != object_components_map_.end())
+	{
+		std::for_each((*i).second.begin(), (*i).second.end(), [=, &result](std::shared_ptr<ComponentInterface> comp) {
+			if(comp->component_type().id == type.id)
+			{
+				result = true;
+				return;
+			}
+		});
+	}
+
+	return false;
 }
 
-MessageResult ObjectManager::PostMessage(const IComponent::ObjectId& object_id, const IComponent::MessageType& type, IComponent::Message message)
+MessageResult ObjectManager::PostMessage(const ObjectId& object_id, const MessageType& type, const Message message)
 {
+	MessageResult result = MR_IGNORED;
+
+	// Find out objects components
+	// if the object has no components, ignore the message
+	ObjectComponentMapIterator i = object_components_map_.find(object_id);
+	if(i != object_components_map_.end())
+	{
+		std::for_each((*i).second.begin(), (*i).second.end(), [=, &result](std::shared_ptr<ComponentInterface> comp) {
+			result = comp->HandleMessage(type, message);
+			if(result != MR_IGNORED)
+				return;
+		});
+	}
+
+	return result;
+}
+
+void ObjectManager::BroadcastMessage(const ObjectId& object_id, const MessageType& type, const Message message)
+{
+	// Find out objects components
+	ObjectComponentMapIterator i = object_components_map_.find(object_id);
+	if(i != object_components_map_.end())
+	{
+		std::for_each((*i).second.begin(), (*i).second.end(), [=](std::shared_ptr<ComponentInterface> comp) {
+			comp->HandleMessage(type, message);
+		});
+	}
+}
+
+void ObjectManager::Tick(const float timeout)
+{
+	std::for_each(update_components_.begin(), update_components_.end(), [=](std::shared_ptr<ComponentInterface> comp) {
+		comp->Update(timeout);
+	});
 }
 
 }

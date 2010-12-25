@@ -17,32 +17,36 @@
  along with MMOServer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LIBANH_COMPONENT_BASE_COMPONENT_H_
-#define LIBANH_COMPONENT_BASE_COMPONENT_H_
+#ifndef LIBANH_COMPONENT_COMPONENT_INTERFACE_H_
+#define LIBANH_COMPONENT_COMPONENT_INTERFACE_H_
 
-#include <map>
-#include <functional>
-#include <anh/component/component_interface.h>
+#include <anh/byte_buffer.h>
+#include <anh/component/component_type.h>
 
 namespace anh {
 namespace component {
 
+typedef	unsigned long long	ObjectId;
+typedef anh::HashString		MessageType;
+typedef anh::ByteBuffer		Message;
+
+/**
+ * Possible result types of a message handling operation.
+ */
+enum MessageResult
+{
+	MR_FALSE,
+	MR_TRUE,
+	MR_IGNORED,
+	MR_ERROR
+};
+
 /**
  * \brief
  */
-class BaseComponent : public ComponentInterface
+class ComponentInterface
 {
 public:
-	/**
-	 * \brief Default constructor.
-	 */
-	BaseComponent(ObjectId id);
-	
-	/**
-	 * \brief Default deconstructor.
-	 */
-	~BaseComponent();
-
 	/**
 	 * \brief Initializes the component.
 	 */
@@ -54,22 +58,20 @@ public:
 	virtual void Deinit(void) = 0;
 
 	/**
-	 * \brief 
+	 * \brief Called every tick if the option is enabled in the ComponentType.
+	 * \see ComponentType
 	 */
-	virtual void Update(const float timeout);
+	virtual void Update(const float timeout) = 0;
 
 	/**
 	 * \breif Handles a message that is passed to the component by the ObjectManager and then
 	 * returns the result of the operation. If no operation was performed MR_IGNORED should be returned.
-	 *
-	 * This function will delegate the message to a handler function that is registered to the components
-	 * message handlers. To add a handler, see AddMessageHandler and RemoveMessageHandler.
 	 * 
 	 * \param type The type of message that needs to be processed.
 	 * \param message The data for the message.
 	 * \returns The result of the operation, if no operation was performed MR_IGNORED should be returned.
 	 */
-	virtual MessageResult HandleMessage(const MessageType& type, Message& message);
+	virtual MessageResult HandleMessage(const MessageType& type, Message message) = 0;
 
 	/**
 	 * \returns The type of component this is in the form of a hashed string.
@@ -80,16 +82,11 @@ public:
 	/**
 	 * \returns The Object Id of the entity that owns this component.
 	 */
-	const ObjectId& object_id(void);
+	virtual const ObjectId& object_id(void) = 0;
 
-protected:
-
-private:
-	
-	ObjectId	object_id_;
 };
 
-} // namespace anh
-} // namespace component
+}  // namespace component
+}  // namespace anh
 
-#endif // LIBANH_COMPONENT_BASE_COMPONENT_H_
+#endif  // LIBANH_COMPONENT_COMPONENT_INTERFACE_H_
