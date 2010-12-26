@@ -35,5 +35,20 @@ const ObjectId& BaseComponent::object_id(void)
 	return object_id_;
 }
 
+void BaseComponent::HandleMessage(const Message message)
+{
+	event_dispatcher_.trigger(message);
+}
+
+void BaseComponent::RegisterMessageHandler(const MessageType& type, MessageHandler handler)
+{
+	event_dispatcher_.subscribe(type, anh::event_dispatcher::EventListener(MessageType("component"), handler));
+}
+
+void BaseComponent::UnregisterMessageHandler(const MessageType& type)
+{
+	event_dispatcher_.unsubscribe(type);
+}
+
 }
 }

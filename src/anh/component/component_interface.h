@@ -20,26 +20,15 @@
 #ifndef LIBANH_COMPONENT_COMPONENT_INTERFACE_H_
 #define LIBANH_COMPONENT_COMPONENT_INTERFACE_H_
 
-#include <anh/byte_buffer.h>
 #include <anh/component/component_type.h>
+#include <anh/event_dispatcher/basic_event.h>
 
 namespace anh {
 namespace component {
 
-typedef	unsigned long long	ObjectId;
-typedef anh::HashString		MessageType;
-typedef anh::ByteBuffer		Message;
-
-/**
- * Possible result types of a message handling operation.
- */
-enum MessageResult
-{
-	MR_FALSE,
-	MR_TRUE,
-	MR_IGNORED,
-	MR_ERROR
-};
+typedef	unsigned long long										ObjectId;
+typedef std::shared_ptr<anh::event_dispatcher::IEvent>			Message;
+typedef anh::event_dispatcher::EventType						MessageType;
 
 /**
  * \brief
@@ -64,14 +53,13 @@ public:
 	virtual void Update(const float timeout) = 0;
 
 	/**
-	 * \breif Handles a message that is passed to the component by the ObjectManager and then
-	 * returns the result of the operation. If no operation was performed MR_IGNORED should be returned.
-	 * 
-	 * \param type The type of message that needs to be processed.
-	 * \param message The data for the message.
-	 * \returns The result of the operation, if no operation was performed MR_IGNORED should be returned.
+	 * \breif Called to handle a message passed to this component by the Object Manager.
+	 * Messages are derived from the event dispatchers IEvent.
+	 * \see IEvent
+	 *
+	 * \param Message The message being passed to this component.
 	 */
-	virtual MessageResult HandleMessage(const MessageType& type, Message message) = 0;
+	virtual void HandleMessage(const Message message) = 0;
 
 	/**
 	 * \returns The type of component this is in the form of a hashed string.

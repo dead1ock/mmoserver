@@ -82,34 +82,9 @@ public:
 	bool HasInterface(const ObjectId& id, const ComponentType& type);
 
 	/**
-	 * \brief Sends a message to each component that is attached to a specific object. When a result other than
-	 * MR_IGNORE is returned by a component, the message passing loop breaks and returns the result. This means
-	 * if two components handle the same message, after the first component has handled its message and returns
-	 * a result other then MR_IGNORE, the second component will not get the passed message.
-	 *
-	 * If you want to send a message to each component without being consered about a result, see BroadcastMessage.
-	 *
-	 * \param object_id Id of the object to post the message to.
-	 * \param type The type of message to post to each component.
-	 * \param message The message to pass to the component.
-	 * \returns MessageResult The result of the post operation.
-	 * \see MessageResult
+	 * \brief 
 	 */
-	MessageResult PostMessage(const ObjectId& object_id, const MessageType& type, const Message message);
-
-	/**
-	 * \brief Sends a message to each component that is attached to a specific object. This function will not break
-	 * from the message passing loop if a return result other than MR_IGNORE is returned by a component. This allows
-	 * you to pass messages that potentually multiple components need to handle or in which you do not care to retrieve
-	 * a result.
-	 *
-	 * If you want a success result, see PostMessage.
-	 *
-	 * \param object_id Id of the object to broadcast the message to.
-	 * \param type The type of message to post to each component.
-	 * \param message The message to pass the component.
-	 */
-	void BroadcastMessage(const ObjectId& object_id, const MessageType& type, const Message message);
+	void BroadcastMessage(const ObjectId& object_id, const Message message);
 
 	/**
 	 * \brief Updates components added to the per-frame update list.

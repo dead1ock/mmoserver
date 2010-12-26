@@ -113,33 +113,14 @@ bool ObjectManager::HasInterface(const ObjectId& id, const ComponentType& type)
 	return false;
 }
 
-MessageResult ObjectManager::PostMessage(const ObjectId& object_id, const MessageType& type, const Message message)
-{
-	MessageResult result = MR_IGNORED;
-
-	// Find out objects components
-	// if the object has no components, ignore the message
-	ObjectComponentMapIterator i = object_components_map_.find(object_id);
-	if(i != object_components_map_.end())
-	{
-		std::for_each((*i).second.begin(), (*i).second.end(), [=, &result](std::shared_ptr<ComponentInterface> comp) {
-			result = comp->HandleMessage(type, message);
-			if(result != MR_IGNORED)
-				return;
-		});
-	}
-
-	return result;
-}
-
-void ObjectManager::BroadcastMessage(const ObjectId& object_id, const MessageType& type, const Message message)
+void ObjectManager::BroadcastMessage(const ObjectId& object_id, const Message message)
 {
 	// Find out objects components
 	ObjectComponentMapIterator i = object_components_map_.find(object_id);
 	if(i != object_components_map_.end())
 	{
 		std::for_each((*i).second.begin(), (*i).second.end(), [=](std::shared_ptr<ComponentInterface> comp) {
-			comp->HandleMessage(type, message);
+			comp->HandleMessage(message);
 		});
 	}
 }

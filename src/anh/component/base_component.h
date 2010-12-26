@@ -21,14 +21,21 @@
 #define LIBANH_COMPONENT_BASE_COMPONENT_H_
 
 #include <map>
-#include <functional>
+#include <anh/event_dispatcher/event_dispatcher.h>
 #include <anh/component/component_interface.h>
 
 namespace anh {
 namespace component {
 
 /**
- * \brief
+ * \brief A basic object component.
+ *
+ * This class implements the Object Id handling interface functions.
+ *
+ * This class also does a basic message handling implementation of the HandleMessage function
+ * which uses the EventDispatcher. Components deriving from this class need only to call the
+ * RegisterMessageHandler and UnregisterMessageHandler methods to bind specific incoming Message Types
+ * to a member function of the component.
  */
 class BaseComponent : public ComponentInterface
 {
@@ -54,22 +61,19 @@ public:
 	virtual void Deinit(void) = 0;
 
 	/**
-	 * \brief 
+	 * \brief Called every tick if the option is enabled in the ComponentType.
+	 * \see ComponentType
 	 */
-	virtual void Update(const float timeout);
+	virtual void Update(const float timeout) = 0;
 
 	/**
-	 * \breif Handles a message that is passed to the component by the ObjectManager and then
-	 * returns the result of the operation. If no operation was performed MR_IGNORED should be returned.
+	 * \breif Called to handle a message passed to this component by the Object Manager.
+	 * Messages are derived from the event dispatchers IEvent.
+	 * \see IEvent
 	 *
-	 * This function will delegate the message to a handler function that is registered to the components
-	 * message handlers. To add a handler, see AddMessageHandler and RemoveMessageHandler.
-	 * 
-	 * \param type The type of message that needs to be processed.
-	 * \param message The data for the message.
-	 * \returns The result of the operation, if no operation was performed MR_IGNORED should be returned.
+	 * \param Message The message being passed to this component.
 	 */
-	virtual MessageResult HandleMessage(const MessageType& type, Message& message);
+	virtual void HandleMessage(const Message message);
 
 	/**
 	 * \returns The type of component this is in the form of a hashed string.
@@ -84,9 +88,30 @@ public:
 
 protected:
 
+	typedef	std::function<bool(const Message)>	MessageHandler;
+
+	/**
+	 * \brief Registers a handler function for a specific Message Type.
+	 *
+	 * Any time a message is passed to this component with the corresponding MessageType,
+	 * the bound Handler function will be called to process the message.
+	 *
+	 * \param type The type of message to bind the handler to.
+	 * \param handler The function which will handle the incoming message.
+	 */
+	void RegisterMessageHandler(const MessageType& type, MessageHandler handler);
+
+	/**
+	 * \brief Unregisters a handler function for a specific Message Type.
+	 *
+	 * \param type The type of message to clear the bindings for.
+	 */
+	void UnregisterMessageHandler(const MessageType& type);
+
 private:
 	
-	ObjectId	object_id_;
+	ObjectId									object_id_;
+	anh::event_dispatcher::EventDispatcher		event_dispatcher_;
 };
 
 } // namespace anh
