@@ -20,7 +20,7 @@
 #ifndef LIBANH_COMPONENT_COMPONENT_INTERFACE_H_
 #define LIBANH_COMPONENT_COMPONENT_INTERFACE_H_
 
-#include <anh/component/component_type.h>
+#include <anh/component/component_info.h>
 #include <anh/event_dispatcher/basic_event.h>
 
 namespace anh {
@@ -28,7 +28,10 @@ namespace component {
 
 typedef	unsigned long long										ObjectId;
 typedef std::shared_ptr<anh::event_dispatcher::IEvent>			Message;
+typedef anh::event_dispatcher::IEvent							IMessage;
 typedef anh::event_dispatcher::EventType						MessageType;
+typedef anh::event_dispatcher::SimpleEvent						SimpleMessage;
+typedef std::shared_ptr<anh::event_dispatcher::IEvent>			MessagePtr;
 
 /**
  * \brief
@@ -65,7 +68,7 @@ public:
 	 * \returns The type of component this is in the form of a hashed string.
 	 * \see HashString
 	 */
-	virtual const ComponentType& component_type(void) = 0;
+	virtual const ComponentInfo& component_info(void) = 0;
 
 	/**
 	 * \returns The Object Id of the entity that owns this component.

@@ -79,7 +79,7 @@ public:
 	 * \returns The type of component this is in the form of a hashed string.
 	 * \see HashString
 	 */
-	virtual const ComponentType& component_type(void) = 0;
+	virtual const ComponentInfo& component_info(void) = 0;
 
 	/**
 	 * \returns The Object Id of the entity that owns this component.

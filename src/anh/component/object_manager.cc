@@ -42,7 +42,7 @@ void ObjectManager::AttachComponent(const ObjectId& id, std::shared_ptr<Componen
 		component_list.push_back(component);
 		object_components_map_.insert(ObjectComponentMapPair(id, component_list));
 
-		if(component->component_type().update_every_frame)
+		if(component->component_info().update_every_frame)
 			update_components_.push_back(component);
 	}
 	else
@@ -55,7 +55,7 @@ void ObjectManager::AttachComponent(const ObjectId& id, std::shared_ptr<Componen
 		// the addition.
 		bool component_exists = false;
 		std::for_each((*i).second.begin(), (*i).second.end(), [=, &component_exists](std::shared_ptr<ComponentInterface> comp) {
-			if(comp->component_type().id == component->component_type().id)
+			if(comp->component_info().type == component->component_info().type)
 			{
 				component_exists = true;
 				return;
@@ -65,7 +65,7 @@ void ObjectManager::AttachComponent(const ObjectId& id, std::shared_ptr<Componen
 		if(!component_exists) {
 			(*i).second.push_back(component);
 
-			if(component->component_type().update_every_frame)
+			if(component->component_info().update_every_frame)
 				update_components_.push_back(component);
 		}
 	}
@@ -82,12 +82,12 @@ void ObjectManager::DetachComponent(const ObjectId& id, const ComponentType& typ
 	{
 		// Find the specific component and remove it.
 		(*i).second.remove_if( [=](std::shared_ptr<ComponentInterface> comp) {
-			return (comp->component_type().id == type.id);
+			return (comp->component_info().type == type);
 		});
 
 		// Lookup whether this component is in the update list.
 		update_components_.remove_if( [=](std::shared_ptr<ComponentInterface> comp) {
-			return ((comp->object_id()) == id && (comp->component_type().id == type.id));
+			return ((comp->object_id()) == id && (comp->component_info().type == type));
 		});
 	}
 }
@@ -102,7 +102,7 @@ bool ObjectManager::HasInterface(const ObjectId& id, const ComponentType& type)
     if(i != object_components_map_.end())
 	{
 		std::for_each((*i).second.begin(), (*i).second.end(), [=, &result](std::shared_ptr<ComponentInterface> comp) {
-			if(comp->component_type().id == type.id)
+			if(comp->component_info().type == type)
 			{
 				result = true;
 				return;
@@ -110,7 +110,7 @@ bool ObjectManager::HasInterface(const ObjectId& id, const ComponentType& type)
 		});
 	}
 
-	return false;
+	return result;
 }
 
 void ObjectManager::BroadcastMessage(const ObjectId& object_id, const Message message)

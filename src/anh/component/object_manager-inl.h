@@ -17,39 +17,33 @@
  along with MMOServer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <anh/component/base_component.h>
+#ifndef LIBANH_COMPONENT_OBJECT_MANAGER_INL_H_
+#define LIBANH_COMPONENT_OBJECT_MANAGER_INL_H_
 
 namespace anh {
 namespace component {
 
-BaseComponent::BaseComponent(ObjectId id)
+template<class T> std::shared_ptr<T> ObjectManager::QueryInterface(const ObjectId& id, const ComponentType& type)
 {
-}
+	std::shared_ptr<T> component(T::NullComponent);
 
-BaseComponent::~BaseComponent()
-{
-}
+	// Find out object.
+	ObjectComponentMapIterator i = object_components_map_.find(id);
+	if(i != object_components_map_.end())
+	{
+		// Seach for the correct interface.
+		std::for_each((*i).second.begin(), (*i).second.end(), [=, &component](std::shared_ptr<ComponentInterface> comp) {
+			if(comp->component_info().type == type) {
+				component = std::static_pointer_cast<T>(comp);
+				return;
+			}
+		});
+	}
 
-const ObjectId& BaseComponent::object_id(void)
-{
-	return object_id_;
-}
-
-void BaseComponent::HandleMessage(const Message message)
-{
-	event_dispatcher_.trigger(message);
-}
-
-void BaseComponent::RegisterMessageHandler(const MessageType& type, MessageHandler handler)
-{
-	event_dispatcher_.registerEventType(type);
-	event_dispatcher_.subscribe(type, anh::event_dispatcher::EventListener(MessageType("component"), handler));
-}
-
-void BaseComponent::UnregisterMessageHandler(const MessageType& type)
-{
-	event_dispatcher_.unsubscribe(type);
+	return component;
 }
 
 }
 }
+
+#endif

@@ -82,7 +82,10 @@ public:
 	bool HasInterface(const ObjectId& id, const ComponentType& type);
 
 	/**
-	 * \brief 
+	 * \brief Broadcasts a message to an object's components.
+	 *
+	 * \param id Id of the object which the message should be broadcasted to.
+	 * \param message The message to be sent to each of the objects components.
 	 */
 	void BroadcastMessage(const ObjectId& object_id, const Message message);
 
@@ -110,5 +113,7 @@ private:
 
 } // namespace component
 } // namespace anh
+
+#include <anh/component/object_manager-inl.h>
 
 #endif // LIBANH_COMPONENT_OBJECT_MANAGER_H_
