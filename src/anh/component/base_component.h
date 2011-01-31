@@ -52,19 +52,21 @@ public:
 
 	/**
 	 * \brief Initializes the component.
+	 *
+	 * \param pt Template properties passed by the ObjectBuilder.
 	 */
-	virtual bool Init(void) = 0;
+	virtual void Init(boost::property_tree::ptree& pt) { };
 
 	/**
 	 * \brief Releases any resources the component holds.
 	 */
-	virtual void Deinit(void) = 0;
+	virtual void Deinit(void) { };
 
 	/**
 	 * \brief Called every tick if the option is enabled in the ComponentType.
 	 * \see ComponentType
 	 */
-	virtual void Update(const float timeout) = 0;
+	virtual void Update(const float timeout) { };
 
 	/**
 	 * \breif Called to handle a message passed to this component by the Object Manager.

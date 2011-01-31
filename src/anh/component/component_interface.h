@@ -20,6 +20,7 @@
 #ifndef LIBANH_COMPONENT_COMPONENT_INTERFACE_H_
 #define LIBANH_COMPONENT_COMPONENT_INTERFACE_H_
 
+#include <boost/property_tree/ptree.hpp>
 #include <anh/component/component_info.h>
 #include <anh/event_dispatcher/basic_event.h>
 
@@ -41,8 +42,10 @@ class ComponentInterface
 public:
 	/**
 	 * \brief Initializes the component.
+	 *
+	 * \param pt Template properties passed by the ObjectBuilder.
 	 */
-	virtual bool Init(void) = 0;
+	virtual void Init(boost::property_tree::ptree& pt) = 0;
 
 	/**
 	 * \brief Releases any resources the component holds.

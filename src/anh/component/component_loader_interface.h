@@ -17,40 +17,23 @@
  along with MMOServer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <anh/component/base_component.h>
+#ifndef LIBANH_COMPONENT_COMPONENT_LOADER_INTERFACE_H_
+#define LIBANH_COMPONENT_COMPONENT_LOADER_INTERFACE_H_
+
+#include <memory>
+#include <anh/component/component_interface.h>
 
 namespace anh {
 namespace component {
 
-BaseComponent::BaseComponent(ObjectId id)
-	: object_id_(id)
+class ComponentLoaderInterface
 {
-}
-
-BaseComponent::~BaseComponent()
-{
-}
-
-const ObjectId& BaseComponent::object_id(void)
-{
-	return object_id_;
-}
-
-void BaseComponent::HandleMessage(const Message message)
-{
-	event_dispatcher_.trigger(message);
-}
-
-void BaseComponent::RegisterMessageHandler(const MessageType& type, MessageHandler handler)
-{
-	event_dispatcher_.registerEventType(type);
-	event_dispatcher_.subscribe(type, anh::event_dispatcher::EventListener(MessageType("component"), handler));
-}
-
-void BaseComponent::UnregisterMessageHandler(const MessageType& type)
-{
-	event_dispatcher_.unsubscribe(type);
-}
+public:
+	virtual bool Load(std::shared_ptr<ComponentInterface> comp) = 0;
+	virtual void Unload(std::shared_ptr<ComponentInterface> comp) = 0;
+};
 
 }
 }
+
+#endif // LIBANH_COMPONENT_LOADER_FACTORY_INTERFACE_H_
