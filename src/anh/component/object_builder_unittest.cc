@@ -16,37 +16,74 @@
  You should have received a copy of the GNU General Public License
  along with MMOServer.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+#include <fstream>
 #include <gtest/gtest.h>
-
+#include <boost/filesystem.hpp>
 #include <anh/component/object_manager.h>
 #include <anh/component/object_builder.h>
 #include <anh/component/test_components_unittest.h>
 
+using namespace std;
+using namespace boost::filesystem;
 using namespace anh::component;
+
 
 #define TEST_OBJECT_ID 0xDEADBABE
 
+class ObjectBuilderTest : public testing::Test
+{
+public:
+    ObjectBuilder object_builder;
+protected:
+    virtual void SetUp();
+    virtual void TearDown();
+};
+
+void ObjectBuilderTest::SetUp() {
+    // create test files
+    create_directory("templates");
+    ofstream of("templates/t21.xml");
+    of << "<object name=\"t21\">"<<endl;
+        of << "<component type=\"TransformComponent\" />" <<endl;
+        of << "<componnet type=\"Radial\">" <<endl;
+         of << "<radials>" << endl;
+            of << "<radial parent=\"0\" index=\"0\">Examine</radial>" <<endl;
+            of << "<radial parent=\"0\" index=\"1\">Equip</radial>" <<endl;
+         of << "</radials>" <<endl;
+        of << "</componnet>" <<endl;
+        of << "<component type=\"Appearance\">" <<endl;
+        of << "<iff></iff>" <<endl;
+        of << "<crc></crc>" <<endl;
+        of << "</component>" <<endl;
+    of << "</object>" <<endl;
+    of.flush();
+    of.close();
+    of.open("templates/ion_rifle.xml");
+    of << "<object name=\"ion_rifle\"><component name=\"TransformComponent\" /></object>" <<endl;
+    of.flush();
+    of.close();
+}
+void ObjectBuilderTest::TearDown() {
+    object_builder.Deinit();
+    remove_all("templates");
+}
+
 /// When a new ObjectBuilder instance is instatiated, no templates should exist.
-TEST(ObjectBuilderTest, NoTemplatesByDefault) {
-	ObjectBuilder object_builder;
+TEST_F(ObjectBuilderTest, NoTemplatesByDefault) {
 	EXPECT_FALSE(object_builder.TemplateExists("t21"));
 }
 
 /// When a new ObjectBuilder is initialized, all the templates in the passed in
 /// directory path should be loaded and stored within the ObjectBuilder.
-TEST(ObjectBuilderTest, Init) {
-	ObjectBuilder object_builder;
-	object_builder.Init("F:/develop/SWGANH/mmoserver/build/src/anh/Debug/templates");
+TEST_F(ObjectBuilderTest, Init) {
+	object_builder.Init("templates");
 
 	EXPECT_TRUE(object_builder.TemplateExists("t21"));
 	EXPECT_TRUE(object_builder.TemplateExists("ion_rifle"));
 }
 
 /// A newly registered creator should return true.
-TEST(ObjectBuilderTest, CanRegisterAndUnregisterCreator) {
-	ObjectBuilder object_builder;
-
+TEST_F(ObjectBuilderTest, CanRegisterAndUnregisterCreator) {
 	object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return std::shared_ptr<ComponentInterface>( new TransformComponent(id) ); });
 	EXPECT_TRUE(object_builder.CreatorExists("TransformComponent"));
 
@@ -54,10 +91,8 @@ TEST(ObjectBuilderTest, CanRegisterAndUnregisterCreator) {
 	EXPECT_FALSE(object_builder.CreatorExists("TransformComponent"));
 }
 
-///
-TEST(ObjectBuilderTest, CanRegisterAndUnregisterLoader) {
-	ObjectBuilder object_builder;
-
+/// verifies that Loader Exists after registration and does not exist after unregister
+TEST_F(ObjectBuilderTest, CanRegisterAndUnregisterLoader) {
 	object_builder.RegisterLoader("TransformComponent", std::shared_ptr<ComponentLoaderInterface>( new TransformComponentLoader() ));
 	EXPECT_TRUE(object_builder.LoaderExists("TransformComponent"));
 
@@ -66,17 +101,13 @@ TEST(ObjectBuilderTest, CanRegisterAndUnregisterLoader) {
 }
 
 /// We shouldn't be able to register two creators for a single component type.
-TEST(ObjectBuilderTest, CannotRegisterTwoCreators) {
-	ObjectBuilder object_builder;
-
+TEST_F(ObjectBuilderTest, CannotRegisterTwoCreators) {
 	EXPECT_TRUE(object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return std::shared_ptr<ComponentInterface>( new TransformComponent(id) ); }));
 	EXPECT_FALSE(object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return std::shared_ptr<ComponentInterface>( new TransformComponent(id) ); }));
 }
 
 /// We shouldn't be able to register two loaders for a single component type.
-TEST(ObjectBuilderTest, CannotRegisterTwoLoaders) {
-	ObjectBuilder object_builder;
-
+TEST_F(ObjectBuilderTest, CannotRegisterTwoLoaders) {
 	std::shared_ptr<ComponentLoaderInterface> loader( new TransformComponentLoader() );
 	EXPECT_TRUE(object_builder.RegisterLoader("TransformComponent", loader));
 	EXPECT_FALSE(object_builder.RegisterLoader("TransformComponent", loader));
@@ -84,26 +115,22 @@ TEST(ObjectBuilderTest, CannotRegisterTwoLoaders) {
 
 /// Test to make sure we are not able to construct an object that doesnt have a
 /// template.
-TEST(ObjectBuilderTest, CannotBuildObjectWithoutTemplate) {
-	ObjectBuilder object_builder;
-	EXPECT_FALSE(object_builder.BuildObject(TEST_OBJECT_ID, "t21"));
+TEST_F(ObjectBuilderTest, CannotBuildObjectWithoutTemplate) {
+	EXPECT_EQ(object_builder.BuildObject(TEST_OBJECT_ID, "t21"), BUILD_FAILED);
 }
 
-///
-TEST(ObjectBuilderTest, BuildWithMissingComponentRegistration) {
-	ObjectBuilder object_builder;
-	object_builder.Init("F:/develop/SWGANH/mmoserver/build/src/anh/Debug/templates");
-
-	
+/// Make sure that if there are no component registrations whatsoever we fail to build the object
+TEST_F(ObjectBuilderTest, BuildWithMissingComponentRegistration) {
+	object_builder.Init("templates");	
+    EXPECT_EQ(object_builder.BuildObject(TEST_OBJECT_ID, "t21"), BUILD_FAILED);
 }
 
-///
-TEST(ObjectBuilderTest, BuildSingleComponentObjectNoLoader) {
-	ObjectBuilder object_builder;
-	object_builder.Init("F:/develop/SWGANH/mmoserver/build/src/anh/Debug/templates");
+/// verifies we can still build an object and use it, if there is no loader attached
+TEST_F(ObjectBuilderTest, BuildSingleComponentObjectNoLoader) {
+	object_builder.Init("templates");
 
 	object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return std::shared_ptr<ComponentInterface>( new TransformComponent(id) ); });
-	EXPECT_TRUE(object_builder.BuildObject(TEST_OBJECT_ID, "t21"));
+    EXPECT_EQ(object_builder.BuildObject(TEST_OBJECT_ID, "t21"), BUILD_INCOMPLETE);
 
 	std::shared_ptr<TransformComponentInterface> component = gObjectManager.QueryInterface<TransformComponentInterface>(TEST_OBJECT_ID, "TransformComponent");
 	
@@ -111,18 +138,19 @@ TEST(ObjectBuilderTest, BuildSingleComponentObjectNoLoader) {
 	EXPECT_TRUE(component->component_info().type == ComponentType("TransformComponent"));
 }
 
-//
-TEST(ObjectBuilderTest, BuildMultiComponentObjectNoLoaders) {
+// verify that we can build a component object with multiple components even with no loaders
+TEST_F(ObjectBuilderTest, BuildMultiComponentObjectNoLoaders) {
+    
 }
 
 //
-TEST(ObjectBuilderTest, BuildSingleComponentObjectWithLoader) {
+TEST_F(ObjectBuilderTest, BuildSingleComponentObjectWithLoader) {
 }
 
 //
-TEST(ObjectBuilderTest, BuildMultiComponentObjectWithLoaders) {
+TEST_F(ObjectBuilderTest, BuildMultiComponentObjectWithLoaders) {
 }
 
 //
-TEST(ObjectBuilderTest, BuildMultiComponentObjectWithMixedLoaders) {
+TEST_F(ObjectBuilderTest, BuildMultiComponentObjectWithMixedLoaders) {
 }

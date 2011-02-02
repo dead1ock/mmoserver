@@ -40,6 +40,12 @@ class ObjectBuilder;
 typedef anh::HashString ObjectType;
 typedef std::function<std::shared_ptr<ComponentInterface>(const ObjectId&)> ComponentCreator;
 
+enum OBJECT_BUILD_STATUS {
+    BUILD_INCOMPLETE = -1,  // component doesn't have a registered creator, object still builds
+    BUILD_SUCCESSFUL = 0,   // no problems object built succesfully without issues
+    BUILD_FAILED = 1        // object is not built
+};
+
 /**
  * \brief
  */
@@ -69,7 +75,7 @@ public:
 	/**
 	 * \brief
 	 */
-	bool BuildObject(const ObjectId& id, const ObjectType& type);
+    OBJECT_BUILD_STATUS BuildObject(const ObjectId& id, const ObjectType& type);
 
 	/**
 	 * \brief

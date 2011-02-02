@@ -48,12 +48,15 @@ void ObjectBuilder::Deinit(void)
 {
 }
 
-bool ObjectBuilder::BuildObject(const ObjectId& id, const ObjectType& type)
+OBJECT_BUILD_STATUS ObjectBuilder::BuildObject(const ObjectId& id, const ObjectType& type)
 {
+    OBJECT_BUILD_STATUS status = BUILD_SUCCESSFUL;
+    bool any_attached = false;
+    
 	ObjectTemplates::iterator i = object_templates_.find(type);
 
 	if(i == object_templates_.end())
-		return false;
+        return BUILD_FAILED;
 
 	boost::property_tree::ptree pt = (*i).second;
 	for(boost::property_tree::ptree::iterator xml_component = pt.get_child("object").begin(); xml_component != pt.get_child("object").end(); xml_component++) {
@@ -64,10 +67,11 @@ bool ObjectBuilder::BuildObject(const ObjectId& id, const ObjectType& type)
 		ComponentType type(xml_component->second.get<std::string>("<xmlattr>.type").c_str());
 
 		// Search for the components creator function by the type we extracted from xml.
-		// If it doesn't exist, return.
 		ComponentCreators::iterator creators_iter = component_creators_.find(type);
-		if(creators_iter == component_creators_.end())
+		if(creators_iter == component_creators_.end()) {
+            status = BUILD_INCOMPLETE;
 			continue;
+        }
 
 		std::shared_ptr<ComponentInterface> component = (*creators_iter).second(id);
 		component->Init(xml_component->second);
@@ -78,9 +82,12 @@ bool ObjectBuilder::BuildObject(const ObjectId& id, const ObjectType& type)
 			(*loader_iter).second->Load(component);
 		
 		gObjectManager.AttachComponent(id,component);
-	}
-
-	return true;
+        any_attached = true;
+    }
+    // if the status is incomplete and no components were attached, then we fail
+    if (status == BUILD_INCOMPLETE && !any_attached)
+        status = BUILD_FAILED;
+	return status;
 }
 
 void ObjectBuilder::DestroyObject(const ObjectId& id)
