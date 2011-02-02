@@ -84,7 +84,7 @@ TEST_F(ObjectBuilderTest, Init) {
 
 /// A newly registered creator should return true.
 TEST_F(ObjectBuilderTest, CanRegisterAndUnregisterCreator) {
-	object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return std::shared_ptr<ComponentInterface>( new TransformComponent(id) ); });
+	object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return shared_ptr<ComponentInterface>( new TransformComponent(id) ); });
 	EXPECT_TRUE(object_builder.CreatorExists("TransformComponent"));
 
 	object_builder.UnregisterCreator("TransformComponent");
@@ -93,7 +93,7 @@ TEST_F(ObjectBuilderTest, CanRegisterAndUnregisterCreator) {
 
 /// verifies that Loader Exists after registration and does not exist after unregister
 TEST_F(ObjectBuilderTest, CanRegisterAndUnregisterLoader) {
-	object_builder.RegisterLoader("TransformComponent", std::shared_ptr<ComponentLoaderInterface>( new TransformComponentLoader() ));
+	object_builder.RegisterLoader("TransformComponent", shared_ptr<ComponentLoaderInterface>( new TransformComponentLoader() ));
 	EXPECT_TRUE(object_builder.LoaderExists("TransformComponent"));
 
 	object_builder.UnregisterLoader("TransformComponent");
@@ -102,15 +102,16 @@ TEST_F(ObjectBuilderTest, CanRegisterAndUnregisterLoader) {
 
 /// We shouldn't be able to register two creators for a single component type.
 TEST_F(ObjectBuilderTest, CannotRegisterTwoCreators) {
-	EXPECT_TRUE(object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return std::shared_ptr<ComponentInterface>( new TransformComponent(id) ); }));
-	EXPECT_FALSE(object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return std::shared_ptr<ComponentInterface>( new TransformComponent(id) ); }));
+	EXPECT_TRUE(object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return shared_ptr<ComponentInterface>( new TransformComponent(id) ); }));
+	EXPECT_FALSE(object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return shared_ptr<ComponentInterface>( new TransformComponent(id) ); }));
 }
 
 /// We shouldn't be able to register two loaders for a single component type.
 TEST_F(ObjectBuilderTest, CannotRegisterTwoLoaders) {
-	std::shared_ptr<ComponentLoaderInterface> loader( new TransformComponentLoader() );
+	shared_ptr<ComponentLoaderInterface> loader( new TransformComponentLoader() );
 	EXPECT_TRUE(object_builder.RegisterLoader("TransformComponent", loader));
 	EXPECT_FALSE(object_builder.RegisterLoader("TransformComponent", loader));
+    EXPECT_TRUE(object_builder.LoaderExists("TransformComponent"));
 }
 
 /// Test to make sure we are not able to construct an object that doesnt have a
@@ -129,10 +130,10 @@ TEST_F(ObjectBuilderTest, BuildWithMissingComponentRegistration) {
 TEST_F(ObjectBuilderTest, BuildSingleComponentObjectNoLoader) {
 	object_builder.Init("templates");
 
-	object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return std::shared_ptr<ComponentInterface>( new TransformComponent(id) ); });
+	object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return shared_ptr<ComponentInterface>( new TransformComponent(id) ); });
     EXPECT_EQ(object_builder.BuildObject(TEST_OBJECT_ID, "t21"), BUILD_INCOMPLETE);
 
-	std::shared_ptr<TransformComponentInterface> component = gObjectManager.QueryInterface<TransformComponentInterface>(TEST_OBJECT_ID, "TransformComponent");
+	shared_ptr<TransformComponentInterface> component = gObjectManager.QueryInterface<TransformComponentInterface>(TEST_OBJECT_ID, "TransformComponent");
 	
 	EXPECT_EQ(TEST_OBJECT_ID, component->object_id());
 	EXPECT_TRUE(component->component_info().type == ComponentType("TransformComponent"));
@@ -140,15 +141,54 @@ TEST_F(ObjectBuilderTest, BuildSingleComponentObjectNoLoader) {
 
 // verify that we can build a component object with multiple components even with no loaders
 TEST_F(ObjectBuilderTest, BuildMultiComponentObjectNoLoaders) {
-    
+    object_builder.Init("templates");
+
+	object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return shared_ptr<ComponentInterface>( new TransformComponent(id) ); });
+    object_builder.RegisterCreator("Appearance", [=] (const ObjectId& id) { return shared_ptr<ComponentInterface>( new AppearanceComponent(id) ); });
+    EXPECT_EQ(object_builder.BuildObject(TEST_OBJECT_ID, "t21"), BUILD_SUCCESSFUL);
+
+	shared_ptr<TransformComponentInterface> component = gObjectManager.QueryInterface<TransformComponentInterface>(TEST_OBJECT_ID, "TransformComponent");
+	
+	EXPECT_EQ(TEST_OBJECT_ID, component->object_id());
+	EXPECT_TRUE(component->component_info().type == ComponentType("TransformComponent"));
 }
 
-//
+// a single component object built with a loder, should build and validate the loader exists.
 TEST_F(ObjectBuilderTest, BuildSingleComponentObjectWithLoader) {
+    object_builder.Init("templates");
+
+	object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return shared_ptr<ComponentInterface>( new TransformComponent(id) ); });
+    shared_ptr<ComponentLoaderInterface> loader( new TransformComponentLoader() );
+	EXPECT_TRUE(object_builder.RegisterLoader("TransformComponent", loader));
+    EXPECT_EQ(object_builder.BuildObject(TEST_OBJECT_ID, "t21"), BUILD_INCOMPLETE);
+    EXPECT_TRUE(object_builder.LoaderExists("TransformComponent"));
+
+	shared_ptr<TransformComponentInterface> component = gObjectManager.QueryInterface<TransformComponentInterface>(TEST_OBJECT_ID, "TransformComponent");
+	
+	EXPECT_EQ(TEST_OBJECT_ID, component->object_id());
+	EXPECT_TRUE(component->component_info().type == ComponentType("TransformComponent"));
 }
 
-//
+// a multiple component object built with multiple loders, should build and validate the loaders exists.
 TEST_F(ObjectBuilderTest, BuildMultiComponentObjectWithLoaders) {
+    object_builder.Init("templates");
+
+	object_builder.RegisterCreator("TransformComponent", [=](const ObjectId& id){ return shared_ptr<ComponentInterface>( new TransformComponent(id) ); });
+    shared_ptr<ComponentLoaderInterface> loader( new TransformComponentLoader() );
+    shared_ptr<ComponentLoaderInterface> loader_app( new AppearanceComponentLoader() );
+	EXPECT_TRUE(object_builder.RegisterLoader("TransformComponent", loader));
+    EXPECT_TRUE(object_builder.RegisterLoader("Appearance", loader_app));
+    EXPECT_EQ(object_builder.BuildObject(TEST_OBJECT_ID, "t21"), BUILD_INCOMPLETE);
+    EXPECT_TRUE(object_builder.LoaderExists("TransformComponent"));
+    EXPECT_TRUE(object_builder.LoaderExists("Appearance"));
+
+	shared_ptr<TransformComponentInterface> transform_component = gObjectManager.QueryInterface<TransformComponentInterface>(TEST_OBJECT_ID, "TransformComponent");
+	EXPECT_EQ(TEST_OBJECT_ID, transform_component->object_id());
+	EXPECT_TRUE(transform_component->component_info().type == ComponentType("TransformComponent"));
+
+    shared_ptr<AppearanceComponentInterface> appearance_component = gObjectManager.QueryInterface<AppearanceComponentInterface>(TEST_OBJECT_ID, "Appearance");
+	EXPECT_EQ(TEST_OBJECT_ID, appearance_component->object_id());
+	EXPECT_TRUE(appearance_component->component_info().type == ComponentType("Appearance"));
 }
 
 //

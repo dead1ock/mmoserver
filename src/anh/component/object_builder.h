@@ -47,33 +47,38 @@ enum OBJECT_BUILD_STATUS {
 };
 
 /**
- * \brief
+ * \brief This class handles the wiring and attachment of components to an entity id
  */
 class ObjectBuilder
 {
 public:
 	/** 
-	 * \brief
+	 * \brief Default constructor
 	 */
 	ObjectBuilder();
 
 	/**
-	 * \brief
+	 * \brief Default destructor
 	 */
 	~ObjectBuilder();
 
 	/**
-	 * \brief
+	 * \brief loads all template xml files in the given directory
 	 */
 	void Init(std::string object_template_dir);
 
 	/**
-	 * \brief
+	 * \brief 
 	 */
 	void Deinit(void);
 
 	/**
-	 * \brief
+	 * \brief Builds the Object given an id and hashstring Type
+     *
+     * \param ObjectId the id of the object to be built
+     * \param ObjectType the hashstring of the type to be built
+     *
+     * \returns see @OBJECT_BUILD_STATUS
 	 */
     OBJECT_BUILD_STATUS BuildObject(const ObjectId& id, const ObjectType& type);
 

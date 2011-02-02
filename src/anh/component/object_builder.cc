@@ -92,6 +92,7 @@ OBJECT_BUILD_STATUS ObjectBuilder::BuildObject(const ObjectId& id, const ObjectT
 
 void ObjectBuilder::DestroyObject(const ObjectId& id)
 {
+    gObjectManager.DetatchAllComponents(id);
 }
 
 bool ObjectBuilder::RegisterLoader(const ComponentType& type, std::shared_ptr<ComponentLoaderInterface> loader)

@@ -91,6 +91,17 @@ void ObjectManager::DetachComponent(const ObjectId& id, const ComponentType& typ
 		});
 	}
 }
+void ObjectManager::DetatchAllComponents(const ObjectId& id)
+{
+    // loop through each match and remove it.
+    ObjectComponentMapIterator i = object_components_map_.find(id);
+	if(i != object_components_map_.end())
+	{
+        (*i).second.remove_if( [=](std::shared_ptr<ComponentInterface> comp) {
+            return(comp->object_id() == id);
+        });
+    }
+}
 
 bool ObjectManager::HasInterface(const ObjectId& id, const ComponentType& type)
 {

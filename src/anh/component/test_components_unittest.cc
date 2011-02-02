@@ -23,6 +23,10 @@ ComponentInfo NullTransformComponent::component_info_ = ComponentInfo(ComponentT
 std::shared_ptr<NullTransformComponent> TransformComponentInterface::NullComponent = std::shared_ptr<NullTransformComponent>(new NullTransformComponent());
 ComponentInfo TransformComponent::component_info_ = ComponentInfo(ComponentType("TransformComponent"), false);
 
+ComponentInfo NullAppearanceComponent::component_info_ = ComponentInfo(ComponentType("NullAppearance"), false);
+std::shared_ptr<NullAppearanceComponent> AppearanceComponentInterface::NullComponent = std::shared_ptr<NullAppearanceComponent>(new NullAppearanceComponent());
+ComponentInfo AppearanceComponent::component_info_ = ComponentInfo(ComponentType("Appearance"), false);
+
 std::shared_ptr<NullTickableComponent> TickableComponentInterface::NullComponent = std::shared_ptr<NullTickableComponent>(new NullTickableComponent());
 ComponentInfo NullTickableComponent::s_component_info_ = ComponentInfo(ComponentType("NullTickableComponent"));
 ComponentInfo TickableComponent::s_component_info_ = ComponentInfo(ComponentType("TickableComponent"), true);

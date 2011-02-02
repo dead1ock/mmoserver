@@ -145,8 +145,8 @@ class RadialComponent : public RadialComponentInterface
 // Appearance Component
 //================================================================
 struct Appearance {
-    Appearance(std::string _iff = "", std::string _client = "",std::string _appearance= "", std::string _animation= "", std::string _movement= "", std::string _name= "", std::string _detail= "", uint16_t _size = 1, uint32_t _crc = 0xDEADBEEF)
-    : iff_file(_iff)
+    Appearance(std::string _iff = "", std::string _client = "",std::string _appearance= "", std::string _animation= "", std::string _movement= "", std::string _name= "", std::string _detail= "", float _size = 1, uint32_t _crc = 0xDEADBEEF)
+    : iff(_iff)
     , client_file(_client)
     , appearance_file(_appearance)
     , movement_file(_movement)
@@ -155,8 +155,8 @@ struct Appearance {
     , size(_size)
     , crc(_crc) {}
 
-    std::string iff_file, client_file, appearance_file, animation_file, movement_file, name, detail_desc;
-    uint16_t& size;
+    std::string iff, client_file, appearance_file, animation_file, movement_file, name, detail_desc;
+    float& size;
     uint32_t& crc;
 };
 class NullAppearanceComponent;
@@ -166,27 +166,28 @@ class AppearanceComponentInterface : public BaseComponent
 public:
 	AppearanceComponentInterface(const ObjectId& id)
 		: BaseComponent(id) { }
-
-
+    virtual Appearance& appearance() =0;
 	static std::shared_ptr<NullAppearanceComponent> NullComponent;
 };
 
 class NullAppearanceComponent : public AppearanceComponentInterface
 {
+public:
     NullAppearanceComponent()
 		: AppearanceComponentInterface(0) { }
 
-    virtual std::string& iff_file() { return appearance_.iff_file; }
+    virtual std::string& iff() { return appearance_.iff; }
     virtual std::string& client_file() { return appearance_.client_file; }
     virtual std::string& appearance_file()  { return appearance_.appearance_file; }
     virtual std::string& animation_file() { return appearance_.animation_file; }
     virtual std::string& movement_file()  { return appearance_.movement_file; }
     virtual std::string& name() { return appearance_.name; }
     virtual std::string& detail_desc() { return appearance_.detail_desc; }
-    virtual uint16_t& size() { return appearance_.size; }
+    virtual float& size() { return appearance_.size; }
     virtual uint32_t& crc() { return appearance_.crc; }
 
 	const ComponentInfo& component_info() { return component_info_; }
+    virtual Appearance& appearance() { return appearance_; }
 private:
     Appearance appearance_;
     static ComponentInfo component_info_;
@@ -199,14 +200,14 @@ public:
 		: AppearanceComponentInterface(id) { }
 
 	void Init(boost::property_tree::ptree& pt) {
-        appearance_.iff_file = pt.get<char>("appearance.iff_file", "object/mobile/tatooine_npc/shared_windom_starkiller.iff");
+        appearance_.iff = pt.get<char>("appearance.iff", "object/mobile/tatooine_npc/shared_windom_starkiller.iff");
 		appearance_.client_file = pt.get<char>("appearance.client_file", "clientdata/npc/client_shared_npc_human_m.cdf");
 		appearance_.appearance_file = pt.get<char>("appearance.appearance_file", "appearance/hum_m.sat");
         appearance_.animation_file = pt.get<char>("appearance.animation_file","all_male.map");
 		appearance_.movement_file = pt.get<char>("appearance.movement_file", "datatables/movement/movement_human.iff");
 		appearance_.name = pt.get<char>("appearance.description", "@npc_detail:human_base_male");
 		appearance_.detail_desc = pt.get<char>("appearance.detail_desc", "@npc_detail:human_base_male");
-        appearance_.size = pt.get<uint16_t>("appearance.size", 1);
+        appearance_.size = pt.get<float>("appearance.size", 1.0);
         appearance_.crc = pt.get<uint32_t>("appearance.crc", 0xDEADBEEF);
 	}
     Appearance& appearance() { return appearance_; }
@@ -216,6 +217,21 @@ public:
 private:
 	Appearance appearance_;
 	static ComponentInfo component_info_;
+};
+class AppearanceComponentLoader : public ComponentLoaderInterface
+{
+public:
+	bool Load(std::shared_ptr<ComponentInterface> comp) {
+		std::shared_ptr<AppearanceComponentInterface> component = std::dynamic_pointer_cast<AppearanceComponentInterface>(comp);
+        component->appearance().name = "test";
+        component->appearance().crc = 0xDEEDBEE;
+		component->appearance().size = 1.5;
+
+		return true;
+	}
+
+	void Unload(std::shared_ptr<ComponentInterface> comp) {
+	}
 };
 
 //================================================================

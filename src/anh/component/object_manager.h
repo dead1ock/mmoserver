@@ -62,7 +62,14 @@ public:
 	 * \param type The type of component we want to detach.
 	 */
 	void DetachComponent(const ObjectId& id, const ComponentType& type);
-	
+
+    /**
+    * \brief Detaches all components from an object id.
+    *  
+    * \param id The id of the object to detatch all components.
+    */
+	void DetatchAllComponents(const ObjectId& id);
+
 	/**
 	 * \brief Fetches an component that is attached to a object.
 	 *

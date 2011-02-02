@@ -99,3 +99,25 @@ TEST(ObjectManagerTest, QueryInterfaceNullComponentReturn) {
 	EXPECT_FALSE(ComponentType("TransformComponent") == component->component_info().type);
 	EXPECT_TRUE(ComponentType("NullTransformComponent") == component->component_info().type);
 }
+/// test that all components detatch from an object id
+TEST(ObjectManagerTest, AllObjectsDetatch) {
+    ObjectManager object_manager;
+    
+    object_manager.AttachComponent(TEST_OBJECT_ID, std::shared_ptr<TransformComponentInterface>(new TransformComponent(TEST_OBJECT_ID)));
+    object_manager.AttachComponent(TEST_OBJECT_ID, std::shared_ptr<AppearanceComponentInterface>(new AppearanceComponent(TEST_OBJECT_ID)));
+    std::shared_ptr<TransformComponentInterface> transform_component = object_manager.QueryInterface<TransformComponentInterface>(TEST_OBJECT_ID, ComponentType("TransformComponent"));
+    std::shared_ptr<AppearanceComponentInterface> appearance_component = object_manager.QueryInterface<AppearanceComponentInterface>(TEST_OBJECT_ID, ComponentType("Appearance"));
+
+    EXPECT_TRUE(ComponentType("TransformComponent") == transform_component->component_info().type);
+    EXPECT_TRUE(ComponentType("Appearance") == appearance_component->component_info().type);
+
+    // detatch
+    object_manager.DetatchAllComponents(TEST_OBJECT_ID);
+    // after detatched we should no longer be able to grab the components with this id
+    transform_component = object_manager.QueryInterface<TransformComponentInterface>(TEST_OBJECT_ID, ComponentType("TransformComponent"));
+    EXPECT_TRUE(ComponentType("NullTransformComponent") == transform_component->component_info().type);
+    appearance_component = object_manager.QueryInterface<AppearanceComponentInterface>(TEST_OBJECT_ID, ComponentType("Appearance"));
+    EXPECT_TRUE(ComponentType("NullAppearance") == appearance_component->component_info().type);
+    EXPECT_EQ(0, transform_component->object_id());
+    EXPECT_EQ(0, appearance_component->object_id());
+}
