@@ -37,8 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <glog/logging.h>
 
+#include "Common/BuildInfo.h"
 #include "Utils/rand.h"
-#include "Common/ConfigManager.h"
 
 #include "DatabaseManager/Database.h"
 
@@ -96,107 +96,6 @@ CharacterLoginHandler::~CharacterLoginHandler(void)
     mMessageDispatch->UnregisterMessageCallback(opClusterZoneTransferApprovedByPosition);
     mMessageDispatch->UnregisterMessageCallback(opClusterZoneTransferDenied);
     mMessageDispatch->UnregisterMessageCallback(opNewbieTutorialResponse);
-    //mMessageDispatch->UnregisterMessageCallback(opCmdSceneReady2);
-}
-
-void	CharacterLoginHandler::_processSelectCharacter(Message* message, DispatchClient* client)
-{
-    boost::recursive_mutex::scoped_lock lk(mSessionMutex);
-
-    PlayerObject*	playerObject;
-    uint64			playerId = message->getUint64();
-
-    // player already exists and is in logged state
-
-    playerObject = dynamic_cast<PlayerObject*>(gWorldManager->getObjectById(playerId));
-
-	//this exact character is currently being logged out ...
-    if((playerObject) && playerObject->isLinkDead())
-    {
-        // Remove old client, if any.
-        delete playerObject->getClient();
-
-        playerObject->setClient(client);
-
-        gWorldManager->addReconnectedPlayer(playerObject);
-
-        gMessageLib->sendChatServerStatus(0x01,0x36,client);
-        gMessageLib->sendParameters(900,client);
-        gMessageLib->sendStartScene(mZoneId,playerObject);
-        gMessageLib->sendServerTime(gWorldManager->getServerTime(),client);
-
-        Weather* weather = gWorldManager->getCurrentWeather();
-
-        gMessageLib->sendWeatherUpdate(weather->mClouds,weather->mWeather,playerObject);
-
-        //initialize us for the world
-        //gWorldManager->addObject(playerObject);
-
-        //create us for others dont use create in world - we are still in the cell
-        //we just want to reinitialize the grid for us
-        gSpatialIndexManager->InitializeObject(playerObject);
-
-        //create ourselves for us
-        gSpatialIndexManager->sendCreatePlayer(playerObject,playerObject);
-
-
-
-        playerObject->togglePlayerCustomFlagOff(PlayerCustomFlag_LogOut);
-        gMessageLib->sendUpdatePlayerFlags(playerObject);
-
-        playerObject->getHam()->checkForRegen();
-        playerObject->getStomach()->checkForRegen();
-    }
-    else if(playerObject  && playerObject->isBeingDestroyed())
-    {
-        //dont quite understand this one - the player is about to be destroyed
-        //so just ignore it ????
-
-        //we might want to wait and then reload the character
-
-        // Remove old client, if any.
-        delete playerObject->getClient();
-    }
-    
-	// account already logged in with a character - we need to unload that character before loading the requested one
-	//make sure that char finished loading before trying to get rid of it
-	else if((playerObject = gWorldManager->getPlayerByAccId(client->getAccountId())))
-    {
-
-        DLOG(INFO) << "CharacterLoginHandler::_processSelectCharacter same account : new character ";
-        // remove old char immidiately
-        if(playerObject->getId() == playerId)
-        {
-            //we need to bail out. If a bot tries to rapidly login it can happen that we get here again even before the character
-            //did finish loading
-            //loading this player a second time and logging it out at the same time will lead to desaster
-            LOG(WARNING) << "CharacterLoginHandler::_processSelectCharacter account " << client->getAccountId() << " is spamming logins";
-            return;
-        }
-
-        //the old character mustnt be necessarily on the disconnect list
-        gWorldManager->removePlayerFromDisconnectedList(playerObject);
-
-        // need to make sure the char is saved and removed, before requesting the new one
-        // so doing it sync
-
-        //start async save with command character request and relevant ID
-        CharacterLoadingContainer* clContainer = new(CharacterLoadingContainer);
-
-        clContainer->mClient		= client;
-        clContainer->mPlayerId		= playerId;
-        clContainer->ofCallback		= this;
-
-		//take the old player out of the grid
-		gSpatialIndexManager->RemoveObjectFromWorld(playerObject);
-
-        gWorldManager->savePlayer(playerObject->getAccountId(),true, WMLogOut_Char_Load, clContainer);
-    }
-    // request a load from db
-    else
-    {
-        gObjectFactory->requestObject(ObjType_Player,0,0,this,playerId,client);
-    }
 }
 
 void CharacterLoginHandler::_processCmdSceneReady(Message* message, DispatchClient* client)
@@ -242,24 +141,138 @@ void CharacterLoginHandler::_processCmdSceneReady(Message* message, DispatchClie
         gMessageLib->sendIgnoreListPlay9(player);
         gMessageLib->sendSceneReadyToChat(client);	// will get any mails received when offline. The point is: Notidy about new mails AFTER the user have got the "logged in" message.
 
-        //// Init and start player world position updates.
-        //ObjectController* ObjCtl = player->getController();
-        //(void)ObjCtl->playerWorldUpdate(true);	// Force a world object update.
-
-        //// This timed event will handle updates of world objects when no external events arrives (movement events from client).
-        //gWorldManager->addPlayerMovementUpdateTime(player, 1000);
-
         //Initialise the buffs
         gBuffManager->InitBuffs(player);
 
         // Some info about the current build
         std::stringstream ss;
-        ss << "Running build " << ConfigManager::getBuildNumber() << " created " << ConfigManager::getBuildTime();
+        ss << "Running build " << GetBuildNumber() << " created " << GetBuildTime();
         std::string tmp(ss.str());
 
         gMessageLib->SendSystemMessage(std::wstring(tmp.begin(), tmp.end()), player);
     }
 }
+
+void	CharacterLoginHandler::_processSelectCharacter(Message* message, DispatchClient* client)
+{
+	
+
+    PlayerObject*	playerObject;
+    uint64			playerId = message->getUint64();
+
+	ObjectIDSet::iterator it = playerZoneList.find(playerId);
+	if(it != playerZoneList.end())	{
+		return;
+	}
+
+	playerZoneList.insert(playerId);
+
+    // player already exists and is in logged state
+
+    playerObject = dynamic_cast<PlayerObject*>(gWorldManager->getObjectById(playerId));
+
+	//this exact character is currently being logged out ...
+    if((playerObject) && playerObject->isLinkDead())
+    {
+        // Remove old client, if any.
+        delete playerObject->getClient();
+
+        playerObject->setClient(client);
+
+        gWorldManager->addReconnectedPlayer(playerObject);
+
+        gMessageLib->sendChatServerStatus(0x01,0x36,client);
+        gMessageLib->sendParameters(900,client);
+        gMessageLib->sendStartScene(mZoneId,playerObject);
+        gMessageLib->sendServerTime(gWorldManager->getServerTime(),client);
+
+        Weather* weather = gWorldManager->getCurrentWeather();
+
+        gMessageLib->sendWeatherUpdate(weather->mClouds,weather->mWeather,playerObject);
+
+        //initialize us for the world
+        //gWorldManager->addObject(playerObject);
+
+        //create us for others dont use create in world - we are still in the cell
+        //we just want to reinitialize the grid for us
+        gSpatialIndexManager->InitializeObject(playerObject);
+
+        //create ourselves for us
+        gSpatialIndexManager->sendCreatePlayer(playerObject,playerObject);
+
+
+
+        playerObject->togglePlayerCustomFlagOff(PlayerCustomFlag_LogOut);
+        gMessageLib->sendUpdatePlayerFlags(playerObject);
+
+        playerObject->getHam()->checkForRegen();
+        playerObject->getStomach()->checkForRegen();
+
+		ObjectIDSet::iterator it = playerZoneList.find(playerId);
+		if(it != playerZoneList.end())	{
+			it = playerZoneList.erase(it);
+		}
+
+    }
+    else if(playerObject  && playerObject->isBeingDestroyed())
+    {
+        //dont quite understand this one - the player is about to be destroyed
+        //so just ignore it ????
+
+        //we might want to wait and then reload the character
+
+        // Remove old client, if any.
+        delete playerObject->getClient();
+
+		ObjectIDSet::iterator it = playerZoneList.find(playerId);
+		if(it != playerZoneList.end())	{
+			it = playerZoneList.erase(it);
+		}
+		return;
+    }
+    
+	// account already logged in with a character - we need to unload that character before loading the requested one
+	//make sure that char finished loading before trying to get rid of it
+	else if((playerObject = gWorldManager->getPlayerByAccId(client->getAccountId())))
+    {
+
+        DLOG(INFO) << "CharacterLoginHandler::_processSelectCharacter same account : new character ";
+        // remove old char immidiately
+        if(playerObject->getId() == playerId)
+        {
+            //we need to bail out. If a bot tries to rapidly login it can happen that we get here again even before the character
+            //did finish loading or even with a properly logged in player ...
+            //loading this player a second time and logging it out at the same time will lead to desaster
+            LOG(WARNING) << "CharacterLoginHandler::_processSelectCharacter account " << client->getAccountId() << " is spamming logins";
+            return;
+        }
+
+        //the old character mustnt be necessarily on the disconnect list
+        gWorldManager->removePlayerFromDisconnectedList(playerObject);
+
+        // need to make sure the char is saved and removed, before requesting the new one
+        // so doing it sync
+
+        //start async save with command character request and relevant ID
+        CharacterLoadingContainer* clContainer = new(CharacterLoadingContainer);
+
+        clContainer->mClient		= client;
+        clContainer->mPlayerId		= playerId;
+        clContainer->ofCallback		= this;
+
+		//take the old player out of the grid
+		gSpatialIndexManager->RemoveObjectFromWorld(playerObject);
+
+        gWorldManager->savePlayer(playerObject->getAccountId(),true, WMLogOut_Char_Load, clContainer);
+    }
+    // request a load from db
+    else
+    {
+        gObjectFactory->requestObject(ObjType_Player,0,0,this,playerId,client);
+    }
+}
+
+//======================================================================================================================
 
 void	CharacterLoginHandler::_processNewbieTutorialResponse(Message* message, DispatchClient* client)
 {
@@ -349,6 +362,11 @@ void CharacterLoginHandler::handleObjectReady(Object* object,DispatchClient* cli
         //create ourselves for us
         gSpatialIndexManager->sendCreatePlayer(player,player);
 
+		//remove us from the loaders list
+		ObjectIDSet::iterator it = playerZoneList.find(player->getId());
+		if(it != playerZoneList.end())	{
+			it = playerZoneList.erase(it);
+		}
 
     }
     break;

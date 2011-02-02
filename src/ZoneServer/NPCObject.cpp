@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Heightmap.h"
 #include "CellObject.h"
 #include "PlayerObject.h"
-#include "QuadTree.h"
 #include "Weapon.h"
 #include "WorldManager.h"
 
@@ -125,7 +124,7 @@ float NPCObject::getHeightAt2DPosition(float xPos, float zPos, bool bestOffer) c
 
     if (Heightmap::isHeightmapCacheAvaliable() && (gHeightmap->isHighResCache() || !bestOffer))
     {
-        yPos = gHeightmap->getCachedHeightAt2DPosition(xPos, zPos);
+        yPos = gHeightmap->getCachedHeight(xPos, zPos);
     }
     else
     {
@@ -133,7 +132,7 @@ float NPCObject::getHeightAt2DPosition(float xPos, float zPos, bool bestOffer) c
     }
     if (yPos == FLT_MIN)
     {
-        assert(false && "NPCObject::getHeightAt2DPosition unable to get height");
+        assert(false && "NPCObject::getCachedHeight unable to get height");
     }
     return yPos;
 }
@@ -212,7 +211,7 @@ void NPCObject::moveAndUpdatePosition(void)
         // Testing to actually use a somewhat real height value.
         position.x += this->getPositionOffset().x;
         position.z += this->getPositionOffset().z;
-        position.y = gHeightmap->getCachedHeightAt2DPosition(position.x, position.z);
+        position.y = gHeightmap->getCachedHeight(position.x, position.z);
     }
     // send out position updates to known players
     this->updatePosition(this->getParentId(),position);

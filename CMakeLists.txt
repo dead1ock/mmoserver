@@ -135,9 +135,13 @@ IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps")
     SET(ZLIB_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/${__deps_dir}/zlib")
 ENDIF()
 
+<<<<<<< HEAD
 SET(Boost_USE_STATIC_LIBS ON)
 FIND_PACKAGE(Boost 1.45.0 COMPONENTS serialization date_time regex thread system program_options REQUIRED)
 
+=======
+FIND_PACKAGE(Boost 1.44.0 COMPONENTS date_time regex thread system program_options REQUIRED)
+>>>>>>> develop
 FIND_PACKAGE(GLM REQUIRED)
 FIND_PACKAGE(GLog REQUIRED)
 FIND_PACKAGE(GTest REQUIRED)

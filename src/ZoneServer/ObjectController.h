@@ -108,7 +108,8 @@ enum CommandQueueErrorStrings
     kInvalidTarget				= 3,
     kTargetTooFarAway			= 4,
     kCannotDoWhileState			= 5,
-    kCmdErrSTF					= 6
+    kCmdErrSTF					= 6,
+	//kCannotDoWhileProspure		= 7,
 };
 //=======================================================================
 enum LocomotionValidator
@@ -326,6 +327,7 @@ public:
     * http://wiki.swganh.org/index.php/CommandQueueRemove_(00000117)
     */
     uint32  getLocoValidator(uint64 locomotion);
+	uint32	getPostureValidator(uint64 posture);
 private:
     // validate command
     bool	_validateEnqueueCommand(uint32 &reply1,uint32 &reply2,uint64 targetId,uint32 opcode,ObjectControllerCmdProperties*& cmdProperties);
